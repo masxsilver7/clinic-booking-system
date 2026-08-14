@@ -1,4 +1,10 @@
 // ==========================================
+// CAREPOINT CLINIC
+// COMPLETE JAVASCRIPT
+// ==========================================
+
+
+// ==========================================
 // DOCTOR DATA
 // ==========================================
 
@@ -36,6 +42,9 @@ const doctors = [
 const bookingForm =
     document.getElementById("booking-form");
 
+const patientNameInput =
+    document.getElementById("patient-name");
+
 const doctorSelect =
     document.getElementById("doctor");
 
@@ -45,14 +54,17 @@ const dateInput =
 const timeSelect =
     document.getElementById("appointment-time");
 
+const reasonInput =
+    document.getElementById("reason");
+
 const appointmentsList =
     document.getElementById("appointments-list");
 
 const confirmationMessage =
     document.getElementById("confirmation-message");
 
-const patientNameInput =
-    document.getElementById("patient-name");
+
+// Error messages
 
 const nameError =
     document.getElementById("name-error");
@@ -66,12 +78,15 @@ const dateError =
 const timeError =
     document.getElementById("time-error");
 
-const reasonInput =
-    document.getElementById("reason");
+
+// Doctor card buttons
+
+const doctorButtons =
+    document.querySelectorAll(".doctor-button");
 
 
 // ==========================================
-// APPOINTMENTS
+// APPOINTMENTS DATA
 // ==========================================
 
 let appointments = [];
@@ -88,7 +103,7 @@ dateInput.min = today;
 
 
 // ==========================================
-// LOAD SAVED APPOINTMENTS
+// LOAD APPOINTMENTS FROM LOCAL STORAGE
 // ==========================================
 
 const savedAppointments =
@@ -108,7 +123,7 @@ if (savedAppointments) {
 
 
 // ==========================================
-// GENERATE TIME SLOTS
+// GENERATE AVAILABLE TIME SLOTS
 // ==========================================
 
 function generateTimeSlots(
@@ -125,24 +140,24 @@ function generateTimeSlots(
     `;
 
 
-    let [startHour, startMinute] =
+    const startParts =
         startTime.split(":").map(Number);
 
-    let [endHour, endMinute] =
+    const endParts =
         endTime.split(":").map(Number);
 
 
     let currentMinutes =
-        startHour * 60 + startMinute;
+        startParts[0] * 60 + startParts[1];
 
     const endingMinutes =
-        endHour * 60 + endMinute;
+        endParts[0] * 60 + endParts[1];
 
 
     let availableSlots = 0;
 
 
-    while (currentMinutes <= endingMinutes) {
+    while (currentMinutes < endingMinutes) {
 
         const hour =
             Math.floor(currentMinutes / 60);
@@ -162,7 +177,7 @@ function generateTimeSlots(
             `${formattedHour}:${formattedMinute}`;
 
 
-        const booked =
+        const alreadyBooked =
             appointments.some(function (appointment) {
 
                 return (
@@ -174,10 +189,7 @@ function generateTimeSlots(
             });
 
 
-        if (!booked) {
-
-            availableSlots++;
-
+        if (!alreadyBooked) {
 
             const option =
                 document.createElement("option");
@@ -188,10 +200,13 @@ function generateTimeSlots(
 
             timeSelect.appendChild(option);
 
+            availableSlots++;
+
         }
 
 
         currentMinutes += 30;
+
     }
 
 
@@ -199,7 +214,7 @@ function generateTimeSlots(
 
         timeSelect.innerHTML = `
             <option value="">
-                No available times for this date
+                No available times
             </option>
         `;
 
@@ -209,7 +224,87 @@ function generateTimeSlots(
 
 
 // ==========================================
-// DOCTOR SELECTION
+// CHECK DOCTOR AVAILABILITY
+// ==========================================
+
+function updateTimeSlots() {
+
+    const selectedDoctor =
+        doctors.find(function (doctor) {
+
+            return doctor.name ===
+                doctorSelect.value;
+
+        });
+
+
+    if (!selectedDoctor) {
+
+        timeSelect.innerHTML = `
+            <option value="">
+                Select a doctor first
+            </option>
+        `;
+
+        return;
+    }
+
+
+    if (!dateInput.value) {
+
+        timeSelect.innerHTML = `
+            <option value="">
+                Select a date first
+            </option>
+        `;
+
+        return;
+    }
+
+
+    const selectedDate =
+        new Date(
+            dateInput.value + "T00:00:00"
+        );
+
+
+    const dayName =
+        selectedDate.toLocaleDateString(
+            "en-US",
+            {
+                weekday: "long"
+            }
+        );
+
+
+    if (
+        !selectedDoctor.availableDays.includes(
+            dayName
+        )
+    ) {
+
+        timeSelect.innerHTML = `
+            <option value="">
+                Doctor unavailable on ${dayName}
+            </option>
+        `;
+
+        return;
+    }
+
+
+    generateTimeSlots(
+        selectedDoctor.startTime,
+        selectedDoctor.endTime,
+        selectedDoctor.name,
+        dateInput.value
+    );
+
+}
+
+
+// ==========================================
+// DOCTOR SELECT CHANGE
 // ==========================================
 
 doctorSelect.addEventListener(
@@ -227,83 +322,14 @@ doctorSelect.addEventListener(
         );
 
 
-        const selectedDoctor =
-            doctors.find(function (doctor) {
-
-                return doctor.name ===
-                    doctorSelect.value;
-
-            });
-
-
-        if (!selectedDoctor) {
-
-            timeSelect.innerHTML = `
-                <option value="">
-                    Select a doctor first
-                </option>
-            `;
-
-            return;
-        }
-
-
-        if (!dateInput.value) {
-
-            timeSelect.innerHTML = `
-                <option value="">
-                    Select a date first
-                </option>
-            `;
-
-            return;
-        }
-
-
-        const selectedDate =
-            new Date(
-                dateInput.value + "T00:00:00"
-            );
-
-
-        const dayName =
-            selectedDate.toLocaleDateString(
-                "en-US",
-                {
-                    weekday: "long"
-                }
-            );
-
-
-        if (
-            !selectedDoctor.availableDays.includes(
-                dayName
-            )
-        ) {
-
-            timeSelect.innerHTML = `
-                <option value="">
-                    Doctor unavailable on ${dayName}
-                </option>
-            `;
-
-            return;
-        }
-
-
-        generateTimeSlots(
-            selectedDoctor.startTime,
-            selectedDoctor.endTime,
-            selectedDoctor.name,
-            dateInput.value
-        );
+        updateTimeSlots();
 
     }
 );
 
 
 // ==========================================
-// DATE SELECTION
+// DATE CHANGE
 // ==========================================
 
 dateInput.addEventListener(
@@ -314,10 +340,6 @@ dateInput.addEventListener(
 
         dateInput.classList.remove(
             "input-error"
-        );
-
-        dateInput.classList.add(
-            "input-success"
         );
 
 
@@ -343,79 +365,23 @@ dateInput.addEventListener(
                 "input-error"
             );
 
-            dateInput.classList.remove(
-                "input-success"
-            );
-
             return;
         }
 
 
-        const selectedDoctor =
-            doctors.find(function (doctor) {
-
-                return doctor.name ===
-                    doctorSelect.value;
-
-            });
-
-
-        if (!selectedDoctor) {
-
-            timeSelect.innerHTML = `
-                <option value="">
-                    Select a doctor first
-                </option>
-            `;
-
-            return;
-        }
-
-
-        const selectedDate =
-            new Date(
-                dateInput.value + "T00:00:00"
-            );
-
-
-        const dayName =
-            selectedDate.toLocaleDateString(
-                "en-US",
-                {
-                    weekday: "long"
-                }
-            );
-
-
-        if (
-            !selectedDoctor.availableDays.includes(
-                dayName
-            )
-        ) {
-
-            timeSelect.innerHTML = `
-                <option value="">
-                    Doctor unavailable on ${dayName}
-                </option>
-            `;
-
-            return;
-        }
-
-
-        generateTimeSlots(
-            selectedDoctor.startTime,
-            selectedDoctor.endTime,
-            selectedDoctor.name,
-            dateInput.value
+        dateInput.classList.add(
+            "input-success"
         );
+
+
+        updateTimeSlots();
 
     }
 );
 
 
 // ==========================================
-// TIME SELECTION
+// TIME CHANGE
 // ==========================================
 
 timeSelect.addEventListener(
@@ -514,6 +480,36 @@ patientNameInput.addEventListener(
 
 
 // ==========================================
+// DOCTOR CARD BUTTONS
+// ==========================================
+
+doctorButtons.forEach(function (button) {
+
+    button.addEventListener(
+        "click",
+        function () {
+
+            const selectedDoctor =
+                button.getAttribute(
+                    "data-doctor"
+                );
+
+
+            doctorSelect.value =
+                selectedDoctor;
+
+
+            doctorSelect.dispatchEvent(
+                new Event("change")
+            );
+
+        }
+    );
+
+});
+
+
+// ==========================================
 // BOOK APPOINTMENT
 // ==========================================
 
@@ -541,7 +537,7 @@ bookingForm.addEventListener(
 
 
         // ------------------------------
-        // VALIDATION
+        // VALIDATE NAME
         // ------------------------------
 
         if (patientName.length < 3) {
@@ -559,6 +555,10 @@ bookingForm.addEventListener(
         }
 
 
+        // ------------------------------
+        // VALIDATE DOCTOR
+        // ------------------------------
+
         if (!doctor) {
 
             doctorError.textContent =
@@ -573,6 +573,10 @@ bookingForm.addEventListener(
             return;
         }
 
+
+        // ------------------------------
+        // VALIDATE DATE
+        // ------------------------------
 
         if (!date) {
 
@@ -604,6 +608,10 @@ bookingForm.addEventListener(
         }
 
 
+        // ------------------------------
+        // VALIDATE TIME
+        // ------------------------------
+
         if (!time) {
 
             timeError.textContent =
@@ -618,6 +626,10 @@ bookingForm.addEventListener(
             return;
         }
 
+
+        // ------------------------------
+        // VALIDATE REASON
+        // ------------------------------
 
         if (!reason) {
 
@@ -641,6 +653,16 @@ bookingForm.addEventListener(
                 return item.name === doctor;
 
             });
+
+
+        if (!selectedDoctor) {
+
+            alert(
+                "Please select a valid doctor."
+            );
+
+            return;
+        }
 
 
         // ------------------------------
@@ -669,7 +691,7 @@ bookingForm.addEventListener(
         ) {
 
             alert(
-                `${doctor} is not available on ${dayName}. Please choose another date.`
+                `${doctor} is not available on ${dayName}.`
             );
 
             return;
@@ -677,7 +699,7 @@ bookingForm.addEventListener(
 
 
         // ------------------------------
-        // CHECK DUPLICATE
+        // CHECK DOUBLE BOOKING
         // ------------------------------
 
         const alreadyBooked =
@@ -698,12 +720,7 @@ bookingForm.addEventListener(
                 "This appointment slot has already been booked."
             );
 
-            generateTimeSlots(
-                selectedDoctor.startTime,
-                selectedDoctor.endTime,
-                selectedDoctor.name,
-                date
-            );
+            updateTimeSlots();
 
             return;
         }
@@ -731,7 +748,7 @@ bookingForm.addEventListener(
 
 
         // ------------------------------
-        // SAVE
+        // SAVE APPOINTMENT
         // ------------------------------
 
         appointments.push(
@@ -746,7 +763,7 @@ bookingForm.addEventListener(
 
 
         // ------------------------------
-        // DISPLAY
+        // DISPLAY APPOINTMENT
         // ------------------------------
 
         displayAppointment(
@@ -762,7 +779,9 @@ bookingForm.addEventListener(
 
             confirmationMessage.innerHTML = `
 
-                <h3>✓ Appointment Confirmed</h3>
+                <h3>
+                    ✓ Appointment Confirmed
+                </h3>
 
                 <p>
                     <strong>Patient:</strong>
@@ -790,7 +809,8 @@ bookingForm.addEventListener(
                 </p>
 
                 <p>
-                    Your appointment has been successfully booked.
+                    Your appointment has been
+                    successfully booked.
                 </p>
 
             `;
@@ -804,12 +824,6 @@ bookingForm.addEventListener(
                 block: "center"
             });
 
-        } else {
-
-            alert(
-                "Appointment booked successfully!"
-            );
-
         }
 
 
@@ -817,12 +831,7 @@ bookingForm.addEventListener(
         // UPDATE TIME SLOTS
         // ------------------------------
 
-        generateTimeSlots(
-            selectedDoctor.startTime,
-            selectedDoctor.endTime,
-            selectedDoctor.name,
-            date
-        );
+        updateTimeSlots();
 
 
         // ------------------------------
@@ -885,18 +894,19 @@ function displayAppointment(
 
     appointmentCard.innerHTML = `
 
-    <span class="appointment-status">
-        Confirmed
-    </span>
+        <span class="appointment-status">
+            Confirmed
+        </span>
 
-    <h3>
-        ${appointment.patientName}
-    </h3>
+        <h3>
+            ${appointment.patientName}
+        </h3>
 
-    <p>
-        <strong>Doctor:</strong>
-        ${appointment.doctor}
-    </p>
+        <p>
+            <strong>Doctor:</strong>
+            ${appointment.doctor}
+        </p>
+
         <p>
             <strong>Date:</strong>
             ${appointment.date}
@@ -912,11 +922,17 @@ function displayAppointment(
             ${appointment.reason}
         </p>
 
-        <button class="edit-btn">
+        <button
+            class="edit-btn"
+            type="button"
+        >
             Edit Appointment
         </button>
 
-        <button class="cancel-btn">
+        <button
+            class="cancel-btn"
+            type="button"
+        >
             Cancel Appointment
         </button>
 
@@ -924,7 +940,7 @@ function displayAppointment(
 
 
     // ======================================
-    // EDIT APPOINTMENT
+    // EDIT
     // ======================================
 
     const editButton =
@@ -949,21 +965,7 @@ function displayAppointment(
                 appointment.date;
 
 
-            const selectedDoctor =
-                doctors.find(function (doctor) {
-
-                    return doctor.name ===
-                        appointment.doctor;
-
-                });
-
-
-            generateTimeSlots(
-                selectedDoctor.startTime,
-                selectedDoctor.endTime,
-                selectedDoctor.name,
-                appointment.date
-            );
+            updateTimeSlots();
 
 
             timeSelect.value =
@@ -1005,7 +1007,7 @@ function displayAppointment(
 
 
     // ======================================
-    // CANCEL APPOINTMENT
+    // CANCEL
     // ======================================
 
     const cancelButton =
@@ -1064,36 +1066,7 @@ function displayAppointment(
             }
 
 
-            // Refresh available slots
-
-            if (
-                doctorSelect.value &&
-                dateInput.value
-            ) {
-
-                const selectedDoctor =
-                    doctors.find(
-                        function (doctor) {
-
-                            return doctor.name ===
-                                doctorSelect.value;
-
-                        }
-                    );
-
-
-                if (selectedDoctor) {
-
-                    generateTimeSlots(
-                        selectedDoctor.startTime,
-                        selectedDoctor.endTime,
-                        selectedDoctor.name,
-                        dateInput.value
-                    );
-
-                }
-
-            }
+            updateTimeSlots();
 
         }
     );
