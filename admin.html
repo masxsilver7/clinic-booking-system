@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>CarePoint Admin Dashboard</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+
+<body>
+
+
+    <!-- ==========================================
+         ADMIN NAVIGATION
+    =========================================== -->
+
+    <header>
+
+        <nav class="navbar">
+
+            <div class="logo">
+                CarePoint Admin
+            </div>
+
+
+            <ul class="nav-links">
+
+                <li>
+                    <a href="index.html">
+                        Patient Website
+                    </a>
+                </li>
+
+            </ul>
+
+        </nav>
+
+    </header>
+
+
+
+    <!-- ==========================================
+         ADMIN DASHBOARD
+    =========================================== -->
+
+    <main class="admin-dashboard">
+
+
+        <!-- PAGE HEADER -->
+
+        <div class="admin-header">
+
+            <div>
+
+                <p>
+                    ADMINISTRATION
+                </p>
+
+                <h1>
+                    Dashboard
+                </h1>
+
+                <p>
+                    Manage CarePoint Clinic appointments
+                    and patient bookings.
+                </p>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ======================================
+             STATISTICS
+        ======================================= -->
+
+        <section class="stats-grid">
+
+
+            <!-- TOTAL -->
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    📅
+                </div>
+
+                <div>
+
+                    <p>
+                        Total Appointments
+                    </p>
+
+                    <h2 id="total-appointments">
+                        0
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- TODAY -->
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    🗓️
+                </div>
+
+                <div>
+
+                    <p>
+                        Today's Appointments
+                    </p>
+
+                    <h2 id="today-appointments">
+                        0
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- CONFIRMED -->
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    ✅
+                </div>
+
+                <div>
+
+                    <p>
+                        Confirmed
+                    </p>
+
+                    <h2 id="confirmed-appointments">
+                        0
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- DOCTORS -->
+
+            <div class="stat-card">
+
+                <div class="stat-icon">
+                    👨‍⚕️
+                </div>
+
+                <div>
+
+                    <p>
+                        Doctors
+                    </p>
+
+                    <h2>
+                        3
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- ======================================
+             APPOINTMENTS
+        ======================================= -->
+
+        <section class="admin-appointments">
+
+
+            <div class="admin-section-header">
+
+                <div>
+
+                    <p>
+                        MANAGEMENT
+                    </p>
+
+                    <h2>
+                        Appointments
+                    </h2>
+
+                </div>
+
+
+                <button
+                    id="refresh-appointments"
+                    class="btn"
+                    type="button"
+                >
+                    Refresh
+                </button>
+
+            </div>
+
+
+
+            <!-- SEARCH -->
+
+            <div class="admin-controls">
+
+                <input
+                    type="text"
+                    id="appointment-search"
+                    placeholder="Search patient or doctor..."
+                >
+
+
+                <select id="doctor-filter">
+
+                    <option value="">
+                        All Doctors
+                    </option>
+
+                    <option value="Dr. Sarah Johnson">
+                        Dr. Sarah Johnson
+                    </option>
+
+                    <option value="Dr. Michael Brown">
+                        Dr. Michael Brown
+                    </option>
+
+                    <option value="Dr. Emily Williams">
+                        Dr. Emily Williams
+                    </option>
+
+                </select>
+
+
+                <input
+                    type="date"
+                    id="date-filter"
+                >
+
+            </div>
+
+
+
+            <!-- APPOINTMENT TABLE -->
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Patient
+                            </th>
+
+                            <th>
+                                Doctor
+                            </th>
+
+                            <th>
+                                Date
+                            </th>
+
+                            <th>
+                                Time
+                            </th>
+
+                            <th>
+                                Reason
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="admin-appointments-list">
+
+                    </tbody>
+
+                </table>
+
+
+                <div
+                    id="admin-no-appointments"
+                    class="admin-empty"
+                >
+
+                    <p>
+                        No appointments found.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- ==========================================
+         JAVASCRIPT
+    =========================================== -->
+
+    <script src="admin.js"></script>
+
+</body>
+
+</html>
