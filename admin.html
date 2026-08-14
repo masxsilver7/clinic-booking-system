@@ -10,7 +10,9 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>CarePoint Admin Dashboard</title>
+    <title>
+        CarePoint Admin Dashboard
+    </title>
 
     <link
         rel="stylesheet"
@@ -20,319 +22,598 @@
 </head>
 
 
-<body>
+<body class="admin-page">
 
 
     <!-- ==========================================
-         ADMIN NAVIGATION
+         ADMIN LAYOUT
     =========================================== -->
 
-    <header>
-
-        <nav class="navbar">
-
-            <div class="logo">
-                CarePoint Admin
-            </div>
-
-
-            <ul class="nav-links">
-
-                <li>
-                    <a href="index.html">
-                        Patient Website
-                    </a>
-                </li>
-
-            </ul>
-
-        </nav>
-
-    </header>
-
-
-
-    <!-- ==========================================
-         ADMIN DASHBOARD
-    =========================================== -->
-
-    <main class="admin-dashboard">
-
-
-        <!-- PAGE HEADER -->
-
-        <div class="admin-header">
-
-            <div>
-
-                <p>
-                    ADMINISTRATION
-                </p>
-
-                <h1>
-                    Dashboard
-                </h1>
-
-                <p>
-                    Manage CarePoint Clinic appointments
-                    and patient bookings.
-                </p>
-
-            </div>
-
-        </div>
-
+    <div class="admin-layout">
 
 
         <!-- ======================================
-             STATISTICS
+             SIDEBAR
         ======================================= -->
 
-        <section class="stats-grid">
+        <aside class="admin-sidebar">
 
 
-            <!-- TOTAL -->
+            <!-- LOGO -->
 
-            <div class="stat-card">
+            <div class="admin-logo">
 
-                <div class="stat-icon">
-                    📅
+                <div class="admin-logo-icon">
+                    🏥
                 </div>
 
                 <div>
-
-                    <p>
-                        Total Appointments
-                    </p>
-
-                    <h2 id="total-appointments">
-                        0
-                    </h2>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- TODAY -->
-
-            <div class="stat-card">
-
-                <div class="stat-icon">
-                    🗓️
-                </div>
-
-                <div>
-
-                    <p>
-                        Today's Appointments
-                    </p>
-
-                    <h2 id="today-appointments">
-                        0
-                    </h2>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- CONFIRMED -->
-
-            <div class="stat-card">
-
-                <div class="stat-icon">
-                    ✅
-                </div>
-
-                <div>
-
-                    <p>
-                        Confirmed
-                    </p>
-
-                    <h2 id="confirmed-appointments">
-                        0
-                    </h2>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- DOCTORS -->
-
-            <div class="stat-card">
-
-                <div class="stat-icon">
-                    👨‍⚕️
-                </div>
-
-                <div>
-
-                    <p>
-                        Doctors
-                    </p>
 
                     <h2>
-                        3
+                        CarePoint
                     </h2>
+
+                    <span>
+                        Administration
+                    </span>
 
                 </div>
 
             </div>
 
 
-        </section>
+
+            <!-- NAVIGATION -->
+
+            <nav class="admin-nav">
+
+
+                <a
+                    href="#dashboard"
+                    class="admin-nav-link active"
+                >
+
+                    <span>
+                        📊
+                    </span>
+
+                    Dashboard
+
+                </a>
+
+
+                <a
+                    href="#appointments"
+                    class="admin-nav-link"
+                >
+
+                    <span>
+                        📅
+                    </span>
+
+                    Appointments
+
+                </a>
+
+
+                <a
+                    href="#doctors"
+                    class="admin-nav-link"
+                >
+
+                    <span>
+                        👨‍⚕️
+                    </span>
+
+                    Doctors
+
+                </a>
+
+
+                <a
+                    href="#patients"
+                    class="admin-nav-link"
+                >
+
+                    <span>
+                        👥
+                    </span>
+
+                    Patients
+
+                </a>
+
+
+                <a
+                    href="#settings"
+                    class="admin-nav-link"
+                >
+
+                    <span>
+                        ⚙️
+                    </span>
+
+                    Settings
+
+                </a>
+
+
+            </nav>
+
+
+
+            <!-- SIDEBAR BOTTOM -->
+
+            <div class="admin-sidebar-bottom">
+
+                <a
+                    href="index.html"
+                    class="patient-site-link"
+                >
+
+                    ← Patient Website
+
+                </a>
+
+
+                <p>
+                    © 2026 CarePoint Clinic
+                </p>
+
+            </div>
+
+
+        </aside>
 
 
 
         <!-- ======================================
-             APPOINTMENTS
+             MAIN CONTENT
         ======================================= -->
 
-        <section class="admin-appointments">
+        <main class="admin-main">
 
 
-            <div class="admin-section-header">
+            <!-- ==================================
+                 TOP BAR
+            =================================== -->
+
+            <header class="admin-topbar">
+
 
                 <div>
 
-                    <p>
+                    <button
+                        class="mobile-menu-button"
+                        type="button"
+                    >
+                        ☰
+                    </button>
+
+                </div>
+
+
+                <div class="admin-profile">
+
+                    <div class="admin-avatar">
+                        A
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Administrator
+                        </strong>
+
+                        <span>
+                            Clinic Manager
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+            </header>
+
+
+
+            <!-- ==================================
+                 DASHBOARD CONTENT
+            =================================== -->
+
+            <div
+                id="dashboard"
+                class="admin-content"
+            >
+
+
+                <!-- PAGE INTRO -->
+
+                <div class="admin-welcome">
+
+                    <div>
+
+                        <p class="admin-label">
+                            OVERVIEW
+                        </p>
+
+                        <h1>
+                            Dashboard
+                        </h1>
+
+                        <p>
+                            Welcome back. Here's what's
+                            happening at CarePoint Clinic.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- ==================================
+                     STATISTICS
+                =================================== -->
+
+                <section class="stats-grid">
+
+
+                    <!-- TOTAL -->
+
+                    <div class="stat-card">
+
+                        <div class="stat-card-icon">
+                            📅
+                        </div>
+
+                        <div class="stat-card-info">
+
+                            <span>
+                                Total Appointments
+                            </span>
+
+                            <h2 id="total-appointments">
+                                0
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- TODAY -->
+
+                    <div class="stat-card">
+
+                        <div class="stat-card-icon">
+                            🗓️
+                        </div>
+
+                        <div class="stat-card-info">
+
+                            <span>
+                                Today's Appointments
+                            </span>
+
+                            <h2 id="today-appointments">
+                                0
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- CONFIRMED -->
+
+                    <div class="stat-card">
+
+                        <div class="stat-card-icon">
+                            ✅
+                        </div>
+
+                        <div class="stat-card-info">
+
+                            <span>
+                                Confirmed
+                            </span>
+
+                            <h2 id="confirmed-appointments">
+                                0
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- DOCTORS -->
+
+                    <div class="stat-card">
+
+                        <div class="stat-card-icon">
+                            👨‍⚕️
+                        </div>
+
+                        <div class="stat-card-info">
+
+                            <span>
+                                Doctors
+                            </span>
+
+                            <h2>
+                                3
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+
+                </section>
+
+
+
+                <!-- ==================================
+                     APPOINTMENTS
+                =================================== -->
+
+                <section
+                    id="appointments"
+                    class="admin-panel"
+                >
+
+
+                    <!-- PANEL HEADER -->
+
+                    <div class="admin-panel-header">
+
+                        <div>
+
+                            <p class="admin-label">
+                                MANAGEMENT
+                            </p>
+
+                            <h2>
+                                Appointments
+                            </h2>
+
+                        </div>
+
+
+                        <button
+                            id="refresh-appointments"
+                            class="admin-refresh-btn"
+                            type="button"
+                        >
+                            ↻ Refresh
+                        </button>
+
+                    </div>
+
+
+
+                    <!-- CONTROLS -->
+
+                    <div class="admin-controls">
+
+
+                        <div class="search-box">
+
+                            <span>
+                                🔍
+                            </span>
+
+                            <input
+                                type="text"
+                                id="appointment-search"
+                                placeholder="Search patient, doctor or reason..."
+                            >
+
+                        </div>
+
+
+                        <select
+                            id="doctor-filter"
+                        >
+
+                            <option value="">
+                                All Doctors
+                            </option>
+
+                            <option value="Dr. Sarah Johnson">
+                                Dr. Sarah Johnson
+                            </option>
+
+                            <option value="Dr. Michael Brown">
+                                Dr. Michael Brown
+                            </option>
+
+                            <option value="Dr. Emily Williams">
+                                Dr. Emily Williams
+                            </option>
+
+                        </select>
+
+
+                        <input
+                            type="date"
+                            id="date-filter"
+                        >
+
+
+                    </div>
+
+
+
+                    <!-- TABLE -->
+
+                    <div class="table-container">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Patient
+                                    </th>
+
+                                    <th>
+                                        Doctor
+                                    </th>
+
+                                    <th>
+                                        Date
+                                    </th>
+
+                                    <th>
+                                        Time
+                                    </th>
+
+                                    <th>
+                                        Reason
+                                    </th>
+
+                                    <th>
+                                        Status
+                                    </th>
+
+                                    <th>
+                                        Action
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody
+                                id="admin-appointments-list"
+                            >
+
+                            </tbody>
+
+                        </table>
+
+
+                        <div
+                            id="admin-no-appointments"
+                            class="admin-empty"
+                        >
+
+                            <div>
+                                📋
+                            </div>
+
+                            <h3>
+                                No appointments found
+                            </h3>
+
+                            <p>
+                                Appointments will appear
+                                here when patients book.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                </section>
+
+
+
+                <!-- ==================================
+                     DOCTORS
+                =================================== -->
+
+                <section
+                    id="doctors"
+                    class="admin-panel admin-coming-soon"
+                >
+
+                    <p class="admin-label">
                         MANAGEMENT
                     </p>
 
                     <h2>
-                        Appointments
+                        Doctors
                     </h2>
 
-                </div>
-
-
-                <button
-                    id="refresh-appointments"
-                    class="btn"
-                    type="button"
-                >
-                    Refresh
-                </button>
-
-            </div>
-
-
-
-            <!-- SEARCH -->
-
-            <div class="admin-controls">
-
-                <input
-                    type="text"
-                    id="appointment-search"
-                    placeholder="Search patient or doctor..."
-                >
-
-
-                <select id="doctor-filter">
-
-                    <option value="">
-                        All Doctors
-                    </option>
-
-                    <option value="Dr. Sarah Johnson">
-                        Dr. Sarah Johnson
-                    </option>
-
-                    <option value="Dr. Michael Brown">
-                        Dr. Michael Brown
-                    </option>
-
-                    <option value="Dr. Emily Williams">
-                        Dr. Emily Williams
-                    </option>
-
-                </select>
-
-
-                <input
-                    type="date"
-                    id="date-filter"
-                >
-
-            </div>
-
-
-
-            <!-- APPOINTMENT TABLE -->
-
-            <div class="table-container">
-
-                <table>
-
-                    <thead>
-
-                        <tr>
-
-                            <th>
-                                Patient
-                            </th>
-
-                            <th>
-                                Doctor
-                            </th>
-
-                            <th>
-                                Date
-                            </th>
-
-                            <th>
-                                Time
-                            </th>
-
-                            <th>
-                                Reason
-                            </th>
-
-                            <th>
-                                Status
-                            </th>
-
-                            <th>
-                                Action
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody id="admin-appointments-list">
-
-                    </tbody>
-
-                </table>
-
-
-                <div
-                    id="admin-no-appointments"
-                    class="admin-empty"
-                >
-
                     <p>
-                        No appointments found.
+                        Doctor management will be added
+                        in the next stage.
                     </p>
 
-                </div>
+                </section>
+
+
+
+                <!-- ==================================
+                     PATIENTS
+                =================================== -->
+
+                <section
+                    id="patients"
+                    class="admin-panel admin-coming-soon"
+                >
+
+                    <p class="admin-label">
+                        MANAGEMENT
+                    </p>
+
+                    <h2>
+                        Patients
+                    </h2>
+
+                    <p>
+                        Patient management will be added
+                        in the next stage.
+                    </p>
+
+                </section>
+
+
+
+                <!-- ==================================
+                     SETTINGS
+                =================================== -->
+
+                <section
+                    id="settings"
+                    class="admin-panel admin-coming-soon"
+                >
+
+                    <p class="admin-label">
+                        SYSTEM
+                    </p>
+
+                    <h2>
+                        Settings
+                    </h2>
+
+                    <p>
+                        System settings will be added
+                        later.
+                    </p>
+
+                </section>
+
 
             </div>
 
 
-        </section>
+        </main>
 
 
-    </main>
+    </div>
 
 
 

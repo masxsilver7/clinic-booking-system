@@ -601,4 +601,63 @@ refreshButton.addEventListener(
 // INITIALIZE
 // ==========================================
 
-updateDashboard();
+updateDashboard();// ==========================================
+// ADMIN SIDEBAR NAVIGATION
+// ==========================================
+
+const adminNavLinks =
+    document.querySelectorAll(".admin-nav-link");
+
+const adminSections = [
+    "dashboard",
+    "appointments",
+    "doctors",
+    "patients",
+    "settings"
+];
+
+
+adminNavLinks.forEach(function (link) {
+
+    link.addEventListener("click", function (event) {
+
+        event.preventDefault();
+
+        // Remove active class from all links
+        adminNavLinks.forEach(function (item) {
+
+            item.classList.remove("active");
+
+        });
+
+
+        // Add active class to clicked link
+        link.classList.add("active");
+
+
+        // Get section ID
+        const targetId =
+            link.getAttribute("href").replace("#", "");
+
+
+        // Find section
+        const targetSection =
+            document.getElementById(targetId);
+
+
+        if (!targetSection) {
+
+            return;
+
+        }
+
+
+        // Scroll to section
+        targetSection.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+
+    });
+
+});
