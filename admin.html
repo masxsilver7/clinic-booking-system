@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -10,36 +9,17 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>
-        CarePoint Admin Dashboard
-    </title>
+    <title>CarePoint Admin Dashboard</title>
 
-    <link
-        rel="stylesheet"
-        href="style.css"
-    >
-
+    <link rel="stylesheet" href="style.css">
 </head>
-
 
 <body class="admin-page">
 
-
-    <!-- ==========================================
-         ADMIN LAYOUT
-    =========================================== -->
-
     <div class="admin-layout">
 
-
-        <!-- ======================================
-             SIDEBAR
-        ======================================= -->
-
+        <!-- SIDEBAR -->
         <aside class="admin-sidebar">
-
-
-            <!-- LOGO -->
 
             <div class="admin-logo">
 
@@ -48,101 +28,57 @@
                 </div>
 
                 <div>
-
-                    <h2>
-                        CarePoint
-                    </h2>
-
-                    <span>
-                        Administration
-                    </span>
-
+                    <h2>CarePoint</h2>
+                    <span>Administration</span>
                 </div>
 
             </div>
 
 
-
-            <!-- NAVIGATION -->
-
             <nav class="admin-nav">
-
 
                 <a
                     href="#dashboard"
                     class="admin-nav-link active"
                 >
-
-                    <span>
-                        📊
-                    </span>
-
+                    <span>📊</span>
                     Dashboard
-
                 </a>
-
 
                 <a
                     href="#appointments"
                     class="admin-nav-link"
                 >
-
-                    <span>
-                        📅
-                    </span>
-
+                    <span>📅</span>
                     Appointments
-
                 </a>
-
 
                 <a
                     href="#doctors"
                     class="admin-nav-link"
                 >
-
-                    <span>
-                        👨‍⚕️
-                    </span>
-
+                    <span>👨‍⚕️</span>
                     Doctors
-
                 </a>
-
 
                 <a
                     href="#patients"
                     class="admin-nav-link"
                 >
-
-                    <span>
-                        👥
-                    </span>
-
+                    <span>👥</span>
                     Patients
-
                 </a>
-
 
                 <a
                     href="#settings"
                     class="admin-nav-link"
                 >
-
-                    <span>
-                        ⚙️
-                    </span>
-
+                    <span>⚙️</span>
                     Settings
-
                 </a>
-
 
             </nav>
 
-
-
-            <!-- SIDEBAR BOTTOM -->
 
             <div class="admin-sidebar-bottom">
 
@@ -150,47 +86,28 @@
                     href="index.html"
                     class="patient-site-link"
                 >
-
                     ← Patient Website
-
                 </a>
 
-
-                <p>
-                    © 2026 CarePoint Clinic
-                </p>
+                <p>© 2026 CarePoint Clinic</p>
 
             </div>
-
 
         </aside>
 
 
-
-        <!-- ======================================
-             MAIN CONTENT
-        ======================================= -->
-
+        <!-- MAIN -->
         <main class="admin-main">
 
-
-            <!-- ==================================
-                 TOP BAR
-            =================================== -->
-
+            <!-- TOP BAR -->
             <header class="admin-topbar">
 
-
-                <div>
-
-                    <button
-                        class="mobile-menu-button"
-                        type="button"
-                    >
-                        ☰
-                    </button>
-
-                </div>
+                <button
+                    class="mobile-menu-button"
+                    type="button"
+                >
+                    ☰
+                </button>
 
 
                 <div class="admin-profile">
@@ -200,36 +117,21 @@
                     </div>
 
                     <div>
-
-                        <strong>
-                            Administrator
-                        </strong>
-
-                        <span>
-                            Clinic Manager
-                        </span>
-
+                        <strong>Administrator</strong>
+                        <span>Clinic Manager</span>
                     </div>
 
                 </div>
 
-
             </header>
 
-
-
-            <!-- ==================================
-                 DASHBOARD CONTENT
-            =================================== -->
 
             <div
                 id="dashboard"
                 class="admin-content"
             >
 
-
-                <!-- PAGE INTRO -->
-
+                <!-- WELCOME -->
                 <div class="admin-welcome">
 
                     <div>
@@ -238,9 +140,7 @@
                             OVERVIEW
                         </p>
 
-                        <h1>
-                            Dashboard
-                        </h1>
+                        <h1>Dashboard</h1>
 
                         <p>
                             Welcome back. Here's what's
@@ -252,15 +152,8 @@
                 </div>
 
 
-
-                <!-- ==================================
-                     STATISTICS
-                =================================== -->
-
+                <!-- STATISTICS -->
                 <section class="stats-grid">
-
-
-                    <!-- TOTAL -->
 
                     <div class="stat-card">
 
@@ -283,9 +176,6 @@
                     </div>
 
 
-
-                    <!-- TODAY -->
-
                     <div class="stat-card">
 
                         <div class="stat-card-icon">
@@ -306,9 +196,6 @@
 
                     </div>
 
-
-
-                    <!-- CONFIRMED -->
 
                     <div class="stat-card">
 
@@ -331,9 +218,6 @@
                     </div>
 
 
-
-                    <!-- DOCTORS -->
-
                     <div class="stat-card">
 
                         <div class="stat-card-icon">
@@ -346,7 +230,7 @@
                                 Doctors
                             </span>
 
-                            <h2>
+                            <h2 id="doctor-count">
                                 3
                             </h2>
 
@@ -354,22 +238,14 @@
 
                     </div>
 
-
                 </section>
 
 
-
-                <!-- ==================================
-                     APPOINTMENTS
-                =================================== -->
-
+                <!-- APPOINTMENTS -->
                 <section
                     id="appointments"
                     class="admin-panel"
                 >
-
-
-                    <!-- PANEL HEADER -->
 
                     <div class="admin-panel-header">
 
@@ -379,12 +255,9 @@
                                 MANAGEMENT
                             </p>
 
-                            <h2>
-                                Appointments
-                            </h2>
+                            <h2>Appointments</h2>
 
                         </div>
-
 
                         <button
                             id="refresh-appointments"
@@ -397,17 +270,12 @@
                     </div>
 
 
-
                     <!-- CONTROLS -->
-
                     <div class="admin-controls">
-
 
                         <div class="search-box">
 
-                            <span>
-                                🔍
-                            </span>
+                            <span>🔍</span>
 
                             <input
                                 type="text"
@@ -418,9 +286,7 @@
                         </div>
 
 
-                        <select
-                            id="doctor-filter"
-                        >
+                        <select id="doctor-filter">
 
                             <option value="">
                                 All Doctors
@@ -446,13 +312,10 @@
                             id="date-filter"
                         >
 
-
                     </div>
 
 
-
-                    <!-- TABLE -->
-
+                    <!-- APPOINTMENT TABLE -->
                     <div class="table-container">
 
                         <table>
@@ -461,43 +324,21 @@
 
                                 <tr>
 
-                                    <th>
-                                        Patient
-                                    </th>
-
-                                    <th>
-                                        Doctor
-                                    </th>
-
-                                    <th>
-                                        Date
-                                    </th>
-
-                                    <th>
-                                        Time
-                                    </th>
-
-                                    <th>
-                                        Reason
-                                    </th>
-
-                                    <th>
-                                        Status
-                                    </th>
-
-                                    <th>
-                                        Action
-                                    </th>
+                                    <th>Patient</th>
+                                    <th>Doctor</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Reason</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
 
                                 </tr>
 
                             </thead>
 
-
                             <tbody
                                 id="admin-appointments-list"
                             >
-
                             </tbody>
 
                         </table>
@@ -508,9 +349,7 @@
                             class="admin-empty"
                         >
 
-                            <div>
-                                📋
-                            </div>
+                            <div>📋</div>
 
                             <h3>
                                 No appointments found
@@ -525,293 +364,255 @@
 
                     </div>
 
-
                 </section>
 
 
-
-                <!-- ==================================
-                     DOCTORS
-                =================================== -->
-
+                <!-- DOCTORS -->
                 <section
-                    <!-- ==================================
-     DOCTORS MANAGEMENT
-=================================== -->
-
-<section
-    id="doctors"
-    class="admin-panel"
->
-
-    <div class="admin-panel-header">
-
-        <div>
-
-            <p class="admin-label">
-                MEDICAL TEAM
-            </p>
-
-            <h2>
-                Doctors
-            </h2>
-
-        </div>
-
-
-        <button
-            id="add-doctor-btn"
-            class="admin-refresh-btn"
-            type="button"
-        >
-            + Add Doctor
-        </button>
-
-    </div>
-
-
-    <!-- DOCTORS GRID -->
-
-    <div
-        id="doctors-grid"
-        class="admin-doctors-grid"
-    >
-
-
-        <!-- DR SARAH -->
-
-        <div
-            class="admin-doctor-card"
-            data-doctor="Dr. Sarah Johnson"
-        >
-
-            <div class="admin-doctor-avatar">
-                SJ
-            </div>
-
-
-            <div class="admin-doctor-info">
-
-                <h3>
-                    Dr. Sarah Johnson
-                </h3>
-
-                <p>
-                    General Physician
-                </p>
-
-            </div>
-
-
-            <div class="admin-doctor-details">
-
-                <div>
-
-                    <span>
-                        📅
-                    </span>
-
-                    <p>
-                        Monday, Wednesday & Friday
-                    </p>
-
-                </div>
-
-
-                <div>
-
-                    <span>
-                        🕐
-                    </span>
-
-                    <p>
-                        09:00 - 15:00
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div class="admin-doctor-footer">
-
-                <span class="doctor-active">
-                    ● Active
-                </span>
-
-                <button
-                    class="edit-doctor-btn"
-                    type="button"
-                    data-doctor="Dr. Sarah Johnson"
+                    id="doctors"
+                    class="admin-panel"
                 >
-                    Edit
-                </button>
 
-            </div>
+                    <div class="admin-panel-header">
 
-        </div>
+                        <div>
 
+                            <p class="admin-label">
+                                MEDICAL TEAM
+                            </p>
 
+                            <h2>Doctors</h2>
 
-        <!-- DR MICHAEL -->
+                        </div>
 
-        <div
-            class="admin-doctor-card"
-            data-doctor="Dr. Michael Brown"
-        >
+                        <button
+                            id="add-doctor-btn"
+                            class="admin-refresh-btn"
+                            type="button"
+                        >
+                            + Add Doctor
+                        </button>
 
-            <div class="admin-doctor-avatar">
-                MB
-            </div>
-
-
-            <div class="admin-doctor-info">
-
-                <h3>
-                    Dr. Michael Brown
-                </h3>
-
-                <p>
-                    Cardiologist
-                </p>
-
-            </div>
+                    </div>
 
 
-            <div class="admin-doctor-details">
+                    <div
+                        id="doctors-grid"
+                        class="admin-doctors-grid"
+                    >
 
-                <div>
+                        <!-- SARAH -->
+                        <div
+                            class="admin-doctor-card"
+                            data-doctor="Dr. Sarah Johnson"
+                        >
 
-                    <span>
-                        📅
-                    </span>
-
-                    <p>
-                        Tuesday & Thursday
-                    </p>
-
-                </div>
-
-
-                <div>
-
-                    <span>
-                        🕐
-                    </span>
-
-                    <p>
-                        10:00 - 16:00
-                    </p>
-
-                </div>
-
-            </div>
+                            <div class="admin-doctor-avatar">
+                                SJ
+                            </div>
 
 
-            <div class="admin-doctor-footer">
+                            <div class="admin-doctor-info">
 
-                <span class="doctor-active">
-                    ● Active
-                </span>
+                                <h3>
+                                    Dr. Sarah Johnson
+                                </h3>
 
-                <button
-                    class="edit-doctor-btn"
-                    type="button"
-                    data-doctor="Dr. Michael Brown"
-                >
-                    Edit
-                </button>
+                                <p>
+                                    General Physician
+                                </p>
 
-            </div>
-
-        </div>
+                            </div>
 
 
+                            <div class="admin-doctor-details">
 
-        <!-- DR EMILY -->
+                                <div>
 
-        <div
-            class="admin-doctor-card"
-            data-doctor="Dr. Emily Williams"
-        >
+                                    <span>📅</span>
 
-            <div class="admin-doctor-avatar">
-                EW
-            </div>
+                                    <p>
+                                        Monday, Wednesday & Friday
+                                    </p>
 
-
-            <div class="admin-doctor-info">
-
-                <h3>
-                    Dr. Emily Williams
-                </h3>
-
-                <p>
-                    Pediatrician
-                </p>
-
-            </div>
+                                </div>
 
 
-            <div class="admin-doctor-details">
+                                <div>
 
-                <div>
+                                    <span>🕐</span>
 
-                    <span>
-                        📅
-                    </span>
+                                    <p>
+                                        09:00 - 15:00
+                                    </p>
 
-                    <p>
-                        Monday, Tuesday & Thursday
-                    </p>
+                                </div>
 
-                </div>
+                            </div>
 
 
-                <div>
+                            <div class="admin-doctor-footer">
 
-                    <span>
-                        🕐
-                    </span>
+                                <span class="doctor-active">
+                                    ● Active
+                                </span>
 
-                    <p>
-                        08:00 - 14:00
-                    </p>
+                                <button
+                                    type="button"
+                                    class="edit-doctor-btn"
+                                    data-doctor="Dr. Sarah Johnson"
+                                >
+                                    Edit
+                                </button>
 
-                </div>
+                            </div>
 
-            </div>
-
-
-            <div class="admin-doctor-footer">
-
-                <span class="doctor-active">
-                    ● Active
-                </span>
-
-                <button
-                    class="edit-doctor-btn"
-                    type="button"
-                    data-doctor="Dr. Emily Williams"
-                >
-                    Edit
-                </button>
-
-            </div>
-
-        </div>
+                        </div>
 
 
-    </div>
+                        <!-- MICHAEL -->
+                        <div
+                            class="admin-doctor-card"
+                            data-doctor="Dr. Michael Brown"
+                        >
+
+                            <div class="admin-doctor-avatar">
+                                MB
+                            </div>
+
+
+                            <div class="admin-doctor-info">
+
+                                <h3>
+                                    Dr. Michael Brown
+                                </h3>
+
+                                <p>
+                                    Cardiologist
+                                </p>
+
+                            </div>
+
+
+                            <div class="admin-doctor-details">
+
+                                <div>
+
+                                    <span>📅</span>
+
+                                    <p>
+                                        Tuesday & Thursday
+                                    </p>
+
+                                </div>
+
+
+                                <div>
+
+                                    <span>🕐</span>
+
+                                    <p>
+                                        10:00 - 16:00
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="admin-doctor-footer">
+
+                                <span class="doctor-active">
+                                    ● Active
+                                </span>
+
+                                <button
+                                    type="button"
+                                    class="edit-doctor-btn"
+                                    data-doctor="Dr. Michael Brown"
+                                >
+                                    Edit
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- EMILY -->
+                        <div
+                            class="admin-doctor-card"
+                            data-doctor="Dr. Emily Williams"
+                        >
+
+                            <div class="admin-doctor-avatar">
+                                EW
+                            </div>
+
+
+                            <div class="admin-doctor-info">
+
+                                <h3>
+                                    Dr. Emily Williams
+                                </h3>
+
+                                <p>
+                                    Pediatrician
+                                </p>
+
+                            </div>
+
+
+                            <div class="admin-doctor-details">
+
+                                <div>
+
+                                    <span>📅</span>
+
+                                    <p>
+                                        Monday, Tuesday & Thursday
+                                    </p>
+
+                                </div>
+
+
+                                <div>
+
+                                    <span>🕐</span>
+
+                                    <p>
+                                        08:00 - 14:00
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="admin-doctor-footer">
+
+                                <span class="doctor-active">
+                                    ● Active
+                                </span>
+
+                                <button
+                                    type="button"
+                                    class="edit-doctor-btn"
+                                    data-doctor="Dr. Emily Williams"
+                                >
+                                    Edit
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
 
                 </section>
 
 
-
-                <!-- ==================================
-                     PATIENTS
-                =================================== -->
-
+                <!-- PATIENTS -->
                 <section
                     id="patients"
                     class="admin-panel admin-coming-soon"
@@ -821,9 +622,7 @@
                         MANAGEMENT
                     </p>
 
-                    <h2>
-                        Patients
-                    </h2>
+                    <h2>Patients</h2>
 
                     <p>
                         Patient management will be added
@@ -833,11 +632,7 @@
                 </section>
 
 
-
-                <!-- ==================================
-                     SETTINGS
-                =================================== -->
-
+                <!-- SETTINGS -->
                 <section
                     id="settings"
                     class="admin-panel admin-coming-soon"
@@ -847,9 +642,7 @@
                         SYSTEM
                     </p>
 
-                    <h2>
-                        Settings
-                    </h2>
+                    <h2>Settings</h2>
 
                     <p>
                         System settings will be added
@@ -858,20 +651,206 @@
 
                 </section>
 
-
             </div>
 
-
         </main>
-
 
     </div>
 
 
+    <!-- EDIT DOCTOR MODAL -->
+    <div
+        id="doctor-modal"
+        class="doctor-modal"
+    >
 
-    <!-- ==========================================
-         JAVASCRIPT
-    =========================================== -->
+        <div class="doctor-modal-content">
+
+            <div class="doctor-modal-header">
+
+                <div>
+
+                    <p class="admin-label">
+                        MEDICAL TEAM
+                    </p>
+
+                    <h2>
+                        Edit Doctor
+                    </h2>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    id="close-doctor-modal"
+                    class="doctor-modal-close"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <form id="edit-doctor-form">
+
+                <div class="form-group">
+
+                    <label for="edit-doctor-name">
+                        Doctor Name
+                    </label>
+
+                    <input
+                        type="text"
+                        id="edit-doctor-name"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="edit-doctor-specialty">
+                        Specialty
+                    </label>
+
+                    <input
+                        type="text"
+                        id="edit-doctor-specialty"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+                        Working Days
+                    </label>
+
+                    <div class="doctor-days">
+
+                        <label>
+                            <input
+                                type="checkbox"
+                                class="doctor-day"
+                                value="Monday"
+                            >
+                            Monday
+                        </label>
+
+                        <label>
+                            <input
+                                type="checkbox"
+                                class="doctor-day"
+                                value="Tuesday"
+                            >
+                            Tuesday
+                        </label>
+
+                        <label>
+                            <input
+                                type="checkbox"
+                                class="doctor-day"
+                                value="Wednesday"
+                            >
+                            Wednesday
+                        </label>
+
+                        <label>
+                            <input
+                                type="checkbox"
+                                class="doctor-day"
+                                value="Thursday"
+                            >
+                            Thursday
+                        </label>
+
+                        <label>
+                            <input
+                                type="checkbox"
+                                class="doctor-day"
+                                value="Friday"
+                            >
+                            Friday
+                        </label>
+
+                        <label>
+                            <input
+                                type="checkbox"
+                                class="doctor-day"
+                                value="Saturday"
+                            >
+                            Saturday
+                        </label>
+
+                    </div>
+
+                </div>
+
+
+                <div class="doctor-time-grid">
+
+                    <div class="form-group">
+
+                        <label for="edit-start-time">
+                            Start Time
+                        </label>
+
+                        <input
+                            type="time"
+                            id="edit-start-time"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="edit-end-time">
+                            End Time
+                        </label>
+
+                        <input
+                            type="time"
+                            id="edit-end-time"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="doctor-modal-actions">
+
+                    <button
+                        type="button"
+                        id="cancel-doctor-edit"
+                        class="admin-cancel-btn"
+                    >
+                        Cancel
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        class="admin-save-btn"
+                    >
+                        Save Changes
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
 
     <script src="admin.js"></script>
 
