@@ -1938,4 +1938,241 @@ textarea {
 
     }
 
+}/* =====================================================
+   DOCTORS MANAGEMENT
+   ===================================================== */
+
+.admin-doctors-grid {
+
+    padding: 25px;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 20px;
+
+}
+
+
+.admin-doctor-card {
+
+    border: 1px solid #e7eaee;
+
+    border-radius: 12px;
+
+    padding: 22px;
+
+    background: #ffffff;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+
+}
+
+
+.admin-doctor-card:hover {
+
+    transform:
+        translateY(-3px);
+
+    box-shadow:
+        0 8px 25px rgba(
+            0,
+            0,
+            0,
+            0.06
+        );
+
+}
+
+
+.admin-doctor-avatar {
+
+    width: 58px;
+
+    height: 58px;
+
+    border-radius: 50%;
+
+    background: #e8f5f1;
+
+    color: #18795f;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 17px;
+
+    font-weight: 700;
+
+    margin-bottom: 16px;
+
+}
+
+
+.admin-doctor-info h3 {
+
+    margin: 0;
+
+    font-size: 17px;
+
+}
+
+
+.admin-doctor-info p {
+
+    margin: 5px 0 0;
+
+    color: #18795f;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+}
+
+
+.admin-doctor-details {
+
+    margin-top: 20px;
+
+    padding-top: 17px;
+
+    border-top: 1px solid #eef0f2;
+
+}
+
+
+.admin-doctor-details div {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 9px;
+
+    margin-bottom: 10px;
+
+}
+
+
+.admin-doctor-details div:last-child {
+
+    margin-bottom: 0;
+
+}
+
+
+.admin-doctor-details span {
+
+    font-size: 14px;
+
+}
+
+
+.admin-doctor-details p {
+
+    margin: 0;
+
+    color: #667085;
+
+    font-size: 12px;
+
+    line-height: 1.5;
+
+}
+
+
+.admin-doctor-footer {
+
+    margin-top: 20px;
+
+    padding-top: 15px;
+
+    border-top: 1px solid #eef0f2;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+}
+
+
+.doctor-active {
+
+    color: #18795f;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+}
+
+
+.edit-doctor-btn {
+
+    border: 1px solid #dce2e8;
+
+    background: #ffffff;
+
+    color: #475467;
+
+    padding: 7px 12px;
+
+    border-radius: 6px;
+
+    cursor: pointer;
+
+    font-size: 12px;
+
+}
+
+
+.edit-doctor-btn:hover {
+
+    background: #f4f8f6;
+
+    color: #18795f;
+
+}
+
+
+/* =====================================================
+   DOCTOR RESPONSIVE
+   ===================================================== */
+
+@media (
+    max-width: 1100px
+) {
+
+    .admin-doctors-grid {
+
+        grid-template-columns:
+            repeat(2, 1fr);
+
+    }
+
+}
+
+
+@media (
+    max-width: 650px
+) {
+
+    .admin-doctors-grid {
+
+        grid-template-columns: 1fr;
+
+        padding: 18px;
+
+    }
+
 }
