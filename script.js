@@ -1,42 +1,11 @@
 // ==========================================
 // CAREPOINT CLINIC
-// COMPLETE JAVASCRIPT
+// PATIENT BOOKING SYSTEM
 // ==========================================
 
 
 // ==========================================
-// DOCTOR DATA
-// ==========================================
-
-const doctors = [
-    {
-        name: "Dr. Sarah Johnson",
-        specialty: "General Physician",
-        availableDays: ["Monday", "Wednesday", "Friday"],
-        startTime: "09:00",
-        endTime: "15:00"
-    },
-
-    {
-        name: "Dr. Michael Brown",
-        specialty: "Cardiologist",
-        availableDays: ["Tuesday", "Thursday"],
-        startTime: "10:00",
-        endTime: "16:00"
-    },
-
-    {
-        name: "Dr. Emily Williams",
-        specialty: "Pediatrician",
-        availableDays: ["Monday", "Tuesday", "Thursday"],
-        startTime: "08:00",
-        endTime: "14:00"
-    }
-];
-
-
-// ==========================================
-// GET HTML ELEMENTS
+// GET ELEMENTS
 // ==========================================
 
 const bookingForm =
@@ -48,10 +17,10 @@ const patientNameInput =
 const doctorSelect =
     document.getElementById("doctor");
 
-const dateInput =
+const appointmentDate =
     document.getElementById("appointment-date");
 
-const timeSelect =
+const appointmentTime =
     document.getElementById("appointment-time");
 
 const reasonInput =
@@ -60,8 +29,13 @@ const reasonInput =
 const appointmentsList =
     document.getElementById("appointments-list");
 
+const noAppointments =
+    document.getElementById("no-appointments");
+
 const confirmationMessage =
-    document.getElementById("confirmation-message");
+    document.getElementById(
+        "confirmation-message"
+    );
 
 
 // Error messages
@@ -79,140 +53,251 @@ const timeError =
     document.getElementById("time-error");
 
 
-// Doctor card buttons
+// ==========================================
+// DOCTOR SCHEDULES
+// ==========================================
 
-const doctorButtons =
-    document.querySelectorAll(".doctor-button");
+const doctorSchedules = {
+
+    "Dr. Sarah Johnson": {
+
+        days: [1, 3, 5],
+
+        startHour: 9,
+
+        endHour: 15
+
+    },
+
+
+    "Dr. Michael Brown": {
+
+        days: [2, 4],
+
+        startHour: 10,
+
+        endHour: 16
+
+    },
+
+
+    "Dr. Emily Williams": {
+
+        days: [1, 2, 4],
+
+        startHour: 8,
+
+        endHour: 14
+
+    }
+
+};
 
 
 // ==========================================
-// APPOINTMENTS DATA
+// GET APPOINTMENTS
 // ==========================================
 
-let appointments = [];
+function getAppointments() {
+
+    const saved =
+        localStorage.getItem(
+            "appointments"
+        );
 
 
-// ==========================================
-// TODAY'S DATE
-// ==========================================
+    if (!saved) {
 
-const today =
-    new Date().toISOString().split("T")[0];
-
-dateInput.min = today;
-
-
-// ==========================================
-// LOAD APPOINTMENTS FROM LOCAL STORAGE
-// ==========================================
-
-const savedAppointments =
-    localStorage.getItem("appointments");
-
-if (savedAppointments) {
-
-    appointments =
-        JSON.parse(savedAppointments);
-
-    appointments.forEach(function (appointment) {
-
-        displayAppointment(appointment);
-
-    });
-}
-
-
-// ==========================================
-// GENERATE AVAILABLE TIME SLOTS
-// ==========================================
-
-function generateTimeSlots(
-    startTime,
-    endTime,
-    doctorName,
-    selectedDate
-) {
-
-    timeSelect.innerHTML = `
-        <option value="">
-            Select a time
-        </option>
-    `;
-
-
-    const startParts =
-        startTime.split(":").map(Number);
-
-    const endParts =
-        endTime.split(":").map(Number);
-
-
-    let currentMinutes =
-        startParts[0] * 60 + startParts[1];
-
-    const endingMinutes =
-        endParts[0] * 60 + endParts[1];
-
-
-    let availableSlots = 0;
-
-
-    while (currentMinutes < endingMinutes) {
-
-        const hour =
-            Math.floor(currentMinutes / 60);
-
-        const minute =
-            currentMinutes % 60;
-
-
-        const formattedHour =
-            String(hour).padStart(2, "0");
-
-        const formattedMinute =
-            String(minute).padStart(2, "0");
-
-
-        const time =
-            `${formattedHour}:${formattedMinute}`;
-
-
-        const alreadyBooked =
-            appointments.some(function (appointment) {
-
-                return (
-                    appointment.doctor === doctorName &&
-                    appointment.date === selectedDate &&
-                    appointment.time === time
-                );
-
-            });
-
-
-        if (!alreadyBooked) {
-
-            const option =
-                document.createElement("option");
-
-            option.value = time;
-
-            option.textContent = time;
-
-            timeSelect.appendChild(option);
-
-            availableSlots++;
-
-        }
-
-
-        currentMinutes += 30;
+        return [];
 
     }
 
 
-    if (availableSlots === 0) {
+    try {
 
-        timeSelect.innerHTML = `
+        return JSON.parse(saved);
+
+    } catch (error) {
+
+        console.error(
+            "Error reading appointments:",
+            error
+        );
+
+        return [];
+
+    }
+
+}
+
+
+// ==========================================
+// SAVE APPOINTMENTS
+// ==========================================
+
+function saveAppointments(
+    appointments
+) {
+
+    localStorage.setItem(
+        "appointments",
+        JSON.stringify(appointments)
+    );
+
+}
+
+
+// ==========================================
+// GENERATE TIME SLOTS
+// ==========================================
+
+function generateTimeSlots() {
+
+    const doctor =
+        doctorSelect.value;
+
+    const date =
+        appointmentDate.value;
+
+
+    appointmentTime.innerHTML = "";
+
+
+    if (!doctor) {
+
+        appointmentTime.innerHTML = `
+            <option value="">
+                Select a doctor first
+            </option>
+        `;
+
+        return;
+
+    }
+
+
+    if (!date) {
+
+        appointmentTime.innerHTML = `
+            <option value="">
+                Select a date first
+            </option>
+        `;
+
+        return;
+
+    }
+
+
+    const selectedDate =
+        new Date(
+            date + "T00:00:00"
+        );
+
+
+    const day =
+        selectedDate.getDay();
+
+
+    const schedule =
+        doctorSchedules[doctor];
+
+
+    if (
+        !schedule.days.includes(day)
+    ) {
+
+        appointmentTime.innerHTML = `
+            <option value="">
+                Doctor unavailable on this day
+            </option>
+        `;
+
+        return;
+
+    }
+
+
+    const appointments =
+        getAppointments();
+
+
+    let slotCreated = false;
+
+
+    for (
+        let hour = schedule.startHour;
+        hour < schedule.endHour;
+        hour++
+    ) {
+
+        for (
+            let minute = 0;
+            minute < 60;
+            minute += 30
+        ) {
+
+            const formattedHour =
+                String(hour)
+                    .padStart(2, "0");
+
+
+            const formattedMinute =
+                String(minute)
+                    .padStart(2, "0");
+
+
+            const time =
+                `${formattedHour}:${formattedMinute}`;
+
+
+            const alreadyBooked =
+                appointments.some(
+                    function (appointment) {
+
+                        return (
+                            appointment.doctor === doctor
+                            &&
+                            appointment.date === date
+                            &&
+                            appointment.time === time
+                            &&
+                            appointment.status !== "Cancelled"
+                        );
+
+                    }
+                );
+
+
+            if (!alreadyBooked) {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+                option.value =
+                    time;
+
+                option.textContent =
+                    time;
+
+                appointmentTime.appendChild(
+                    option
+                );
+
+                slotCreated = true;
+
+            }
+
+        }
+
+    }
+
+
+    if (!slotCreated) {
+
+        appointmentTime.innerHTML = `
             <option value="">
                 No available times
             </option>
@@ -224,105 +309,14 @@ function generateTimeSlots(
 
 
 // ==========================================
-// CHECK DOCTOR AVAILABILITY
-// ==========================================
-
-function updateTimeSlots() {
-
-    const selectedDoctor =
-        doctors.find(function (doctor) {
-
-            return doctor.name ===
-                doctorSelect.value;
-
-        });
-
-
-    if (!selectedDoctor) {
-
-        timeSelect.innerHTML = `
-            <option value="">
-                Select a doctor first
-            </option>
-        `;
-
-        return;
-    }
-
-
-    if (!dateInput.value) {
-
-        timeSelect.innerHTML = `
-            <option value="">
-                Select a date first
-            </option>
-        `;
-
-        return;
-    }
-
-
-    const selectedDate =
-        new Date(
-            dateInput.value + "T00:00:00"
-        );
-
-
-    const dayName =
-        selectedDate.toLocaleDateString(
-            "en-US",
-            {
-                weekday: "long"
-            }
-        );
-
-
-    if (
-        !selectedDoctor.availableDays.includes(
-            dayName
-        )
-    ) {
-
-        timeSelect.innerHTML = `
-            <option value="">
-                Doctor unavailable on ${dayName}
-            </option>
-        `;
-
-        return;
-    }
-
-
-    generateTimeSlots(
-        selectedDoctor.startTime,
-        selectedDoctor.endTime,
-        selectedDoctor.name,
-        dateInput.value
-    );
-
-}
-
-
-// ==========================================
-// DOCTOR SELECT CHANGE
+// DOCTOR CHANGE
 // ==========================================
 
 doctorSelect.addEventListener(
     "change",
     function () {
 
-        doctorError.textContent = "";
-
-        doctorSelect.classList.remove(
-            "input-error"
-        );
-
-        doctorSelect.classList.add(
-            "input-success"
-        );
-
-
-        updateTimeSlots();
+        generateTimeSlots();
 
     }
 );
@@ -332,181 +326,53 @@ doctorSelect.addEventListener(
 // DATE CHANGE
 // ==========================================
 
-dateInput.addEventListener(
+appointmentDate.addEventListener(
     "change",
     function () {
 
-        dateError.textContent = "";
-
-        dateInput.classList.remove(
-            "input-error"
-        );
-
-
-        if (!dateInput.value) {
-
-            dateError.textContent =
-                "Please select a date.";
-
-            dateInput.classList.add(
-                "input-error"
-            );
-
-            return;
-        }
-
-
-        if (dateInput.value < today) {
-
-            dateError.textContent =
-                "Please select a future date.";
-
-            dateInput.classList.add(
-                "input-error"
-            );
-
-            return;
-        }
-
-
-        dateInput.classList.add(
-            "input-success"
-        );
-
-
-        updateTimeSlots();
+        generateTimeSlots();
 
     }
 );
 
 
 // ==========================================
-// TIME CHANGE
+// SET MINIMUM DATE
 // ==========================================
 
-timeSelect.addEventListener(
-    "change",
-    function () {
+function setMinimumDate() {
 
-        if (!timeSelect.value) {
-
-            timeError.textContent =
-                "Please select an available time.";
-
-            timeSelect.classList.add(
-                "input-error"
-            );
-
-            timeSelect.classList.remove(
-                "input-success"
-            );
-
-            return;
-        }
+    const today =
+        new Date();
 
 
-        timeError.textContent = "";
-
-        timeSelect.classList.remove(
-            "input-error"
-        );
-
-        timeSelect.classList.add(
-            "input-success"
-        );
-
-    }
-);
+    const year =
+        today.getFullYear();
 
 
-// ==========================================
-// NAME VALIDATION
-// ==========================================
-
-patientNameInput.addEventListener(
-    "input",
-    function () {
-
-        const name =
-            patientNameInput.value.trim();
+    const month =
+        String(
+            today.getMonth() + 1
+        ).padStart(2, "0");
 
 
-        if (name.length === 0) {
-
-            nameError.textContent =
-                "Please enter your name.";
-
-            patientNameInput.classList.add(
-                "input-error"
-            );
-
-            patientNameInput.classList.remove(
-                "input-success"
-            );
-
-            return;
-        }
+    const day =
+        String(
+            today.getDate()
+        ).padStart(2, "0");
 
 
-        if (name.length < 3) {
-
-            nameError.textContent =
-                "Name must be at least 3 characters.";
-
-            patientNameInput.classList.add(
-                "input-error"
-            );
-
-            patientNameInput.classList.remove(
-                "input-success"
-            );
-
-            return;
-        }
+    const formattedDate =
+        `${year}-${month}-${day}`;
 
 
-        nameError.textContent = "";
+    appointmentDate.min =
+        formattedDate;
 
-        patientNameInput.classList.remove(
-            "input-error"
-        );
-
-        patientNameInput.classList.add(
-            "input-success"
-        );
-
-    }
-);
+}
 
 
-// ==========================================
-// DOCTOR CARD BUTTONS
-// ==========================================
-
-doctorButtons.forEach(function (button) {
-
-    button.addEventListener(
-        "click",
-        function () {
-
-            const selectedDoctor =
-                button.getAttribute(
-                    "data-doctor"
-                );
-
-
-            doctorSelect.value =
-                selectedDoctor;
-
-
-            doctorSelect.dispatchEvent(
-                new Event("change")
-            );
-
-        }
-    );
-
-});
+setMinimumDate();
 
 
 // ==========================================
@@ -520,116 +386,96 @@ bookingForm.addEventListener(
         event.preventDefault();
 
 
+        // Clear errors
+
+        nameError.textContent = "";
+
+        doctorError.textContent = "";
+
+        dateError.textContent = "";
+
+        timeError.textContent = "";
+
+
+        let valid = true;
+
+
+        // NAME
+
         const patientName =
             patientNameInput.value.trim();
+
+
+        if (patientName.length < 2) {
+
+            nameError.textContent =
+                "Please enter your full name.";
+
+            valid = false;
+
+        }
+
+
+        // DOCTOR
 
         const doctor =
             doctorSelect.value;
 
-        const date =
-            dateInput.value;
-
-        const time =
-            timeSelect.value;
-
-        const reason =
-            reasonInput.value.trim();
-
-
-        // ------------------------------
-        // VALIDATE NAME
-        // ------------------------------
-
-        if (patientName.length < 3) {
-
-            nameError.textContent =
-                "Please enter at least 3 characters.";
-
-            patientNameInput.classList.add(
-                "input-error"
-            );
-
-            patientNameInput.focus();
-
-            return;
-        }
-
-
-        // ------------------------------
-        // VALIDATE DOCTOR
-        // ------------------------------
 
         if (!doctor) {
 
             doctorError.textContent =
                 "Please select a doctor.";
 
-            doctorSelect.classList.add(
-                "input-error"
-            );
+            valid = false;
 
-            doctorSelect.focus();
-
-            return;
         }
 
 
-        // ------------------------------
-        // VALIDATE DATE
-        // ------------------------------
+        // DATE
+
+        const date =
+            appointmentDate.value;
+
 
         if (!date) {
 
             dateError.textContent =
-                "Please select a date.";
+                "Please select an appointment date.";
 
-            dateInput.classList.add(
-                "input-error"
-            );
+            valid = false;
 
-            dateInput.focus();
-
-            return;
         }
 
 
-        if (date < today) {
+        // TIME
 
-            dateError.textContent =
-                "Please select a future date.";
+        const time =
+            appointmentTime.value;
 
-            dateInput.classList.add(
-                "input-error"
-            );
-
-            dateInput.focus();
-
-            return;
-        }
-
-
-        // ------------------------------
-        // VALIDATE TIME
-        // ------------------------------
 
         if (!time) {
 
             timeError.textContent =
-                "Please select an available time.";
+                "Please select an appointment time.";
 
-            timeSelect.classList.add(
-                "input-error"
-            );
+            valid = false;
 
-            timeSelect.focus();
-
-            return;
         }
 
 
-        // ------------------------------
-        // VALIDATE REASON
-        // ------------------------------
+        if (!valid) {
+
+            return;
+
+        }
+
+
+        // REASON
+
+        const reason =
+            reasonInput.value.trim();
+
 
         if (!reason) {
 
@@ -637,98 +483,18 @@ bookingForm.addEventListener(
                 "Please enter the reason for your visit."
             );
 
-            reasonInput.focus();
-
             return;
+
         }
 
 
-        // ------------------------------
-        // FIND DOCTOR
-        // ------------------------------
+        // GET EXISTING APPOINTMENTS
 
-        const selectedDoctor =
-            doctors.find(function (item) {
-
-                return item.name === doctor;
-
-            });
+        const appointments =
+            getAppointments();
 
 
-        if (!selectedDoctor) {
-
-            alert(
-                "Please select a valid doctor."
-            );
-
-            return;
-        }
-
-
-        // ------------------------------
-        // CHECK WORKING DAY
-        // ------------------------------
-
-        const selectedDate =
-            new Date(
-                date + "T00:00:00"
-            );
-
-
-        const dayName =
-            selectedDate.toLocaleDateString(
-                "en-US",
-                {
-                    weekday: "long"
-                }
-            );
-
-
-        if (
-            !selectedDoctor.availableDays.includes(
-                dayName
-            )
-        ) {
-
-            alert(
-                `${doctor} is not available on ${dayName}.`
-            );
-
-            return;
-        }
-
-
-        // ------------------------------
-        // CHECK DOUBLE BOOKING
-        // ------------------------------
-
-        const alreadyBooked =
-            appointments.some(function (appointment) {
-
-                return (
-                    appointment.doctor === doctor &&
-                    appointment.date === date &&
-                    appointment.time === time
-                );
-
-            });
-
-
-        if (alreadyBooked) {
-
-            alert(
-                "This appointment slot has already been booked."
-            );
-
-            updateTimeSlots();
-
-            return;
-        }
-
-
-        // ------------------------------
         // CREATE APPOINTMENT
-        // ------------------------------
 
         const appointment = {
 
@@ -742,338 +508,359 @@ bookingForm.addEventListener(
 
             time: time,
 
-            reason: reason
+            reason: reason,
+
+            status: "Pending"
 
         };
 
 
-        // ------------------------------
-        // SAVE APPOINTMENT
-        // ------------------------------
+        // SAVE
 
         appointments.push(
             appointment
         );
 
 
-        localStorage.setItem(
-            "appointments",
-            JSON.stringify(appointments)
+        saveAppointments(
+            appointments
         );
 
 
-        // ------------------------------
-        // DISPLAY APPOINTMENT
-        // ------------------------------
-
-        displayAppointment(
-            appointment
-        );
-
-
-        // ------------------------------
         // CONFIRMATION
-        // ------------------------------
 
-        if (confirmationMessage) {
+        confirmationMessage.innerHTML = `
 
-            confirmationMessage.innerHTML = `
+            <div class="success-message">
 
                 <h3>
-                    ✓ Appointment Confirmed
+                    Appointment Booked Successfully!
                 </h3>
 
                 <p>
-                    <strong>Patient:</strong>
-                    ${patientName}
+                    Your appointment with
+                    <strong>${doctor}</strong>
+                    has been submitted.
                 </p>
 
                 <p>
-                    <strong>Doctor:</strong>
-                    ${doctor}
+                    Date: <strong>${date}</strong>
                 </p>
 
                 <p>
-                    <strong>Date:</strong>
-                    ${date}
+                    Time: <strong>${time}</strong>
                 </p>
 
                 <p>
-                    <strong>Time:</strong>
-                    ${time}
+                    Status:
+                    <strong>Pending</strong>
                 </p>
 
-                <p>
-                    <strong>Reason:</strong>
-                    ${reason}
-                </p>
+            </div>
 
-                <p>
-                    Your appointment has been
-                    successfully booked.
-                </p>
+        `;
 
-            `;
 
-            confirmationMessage.classList.add(
-                "show"
-            );
+        // RESET FORM
 
-            confirmationMessage.scrollIntoView({
-                behavior: "smooth",
-                block: "center"
+        bookingForm.reset();
+
+
+        appointmentTime.innerHTML = `
+            <option value="">
+                Select a doctor first
+            </option>
+        `;
+
+
+        // UPDATE LIST
+
+        displayAppointments();
+
+
+        // SCROLL
+
+        document
+            .getElementById("appointments")
+            .scrollIntoView({
+                behavior: "smooth"
             });
-
-        }
-
-
-        // ------------------------------
-        // UPDATE TIME SLOTS
-        // ------------------------------
-
-        updateTimeSlots();
-
-
-        // ------------------------------
-        // CLEAR FORM
-        // ------------------------------
-
-        patientNameInput.value = "";
-
-        reasonInput.value = "";
-
-        patientNameInput.classList.remove(
-            "input-success"
-        );
-
-        timeSelect.classList.remove(
-            "input-success"
-        );
-
-        nameError.textContent = "";
-
-        timeError.textContent = "";
 
     }
 );
 
 
 // ==========================================
-// DISPLAY APPOINTMENT
+// DISPLAY APPOINTMENTS
 // ==========================================
 
-function displayAppointment(
-    appointment
-) {
+function displayAppointments() {
 
-    if (!appointmentsList) {
+    const appointments =
+        getAppointments();
+
+
+    appointmentsList.innerHTML = "";
+
+
+    if (appointments.length === 0) {
+
+        noAppointments.style.display =
+            "block";
+
         return;
-    }
-
-
-    const noAppointments =
-        document.getElementById(
-            "no-appointments"
-        );
-
-
-    if (noAppointments) {
-
-        noAppointments.remove();
 
     }
 
 
-    const appointmentCard =
-        document.createElement("div");
+    noAppointments.style.display =
+        "none";
 
 
-    appointmentCard.className =
-        "appointment-card";
+    appointments.forEach(
+        function (appointment) {
 
-
-    appointmentCard.innerHTML = `
-
-        <span class="appointment-status">
-            Confirmed
-        </span>
-
-        <h3>
-            ${appointment.patientName}
-        </h3>
-
-        <p>
-            <strong>Doctor:</strong>
-            ${appointment.doctor}
-        </p>
-
-        <p>
-            <strong>Date:</strong>
-            ${appointment.date}
-        </p>
-
-        <p>
-            <strong>Time:</strong>
-            ${appointment.time}
-        </p>
-
-        <p>
-            <strong>Reason:</strong>
-            ${appointment.reason}
-        </p>
-
-        <button
-            class="edit-btn"
-            type="button"
-        >
-            Edit Appointment
-        </button>
-
-        <button
-            class="cancel-btn"
-            type="button"
-        >
-            Cancel Appointment
-        </button>
-
-    `;
-
-
-    // ======================================
-    // EDIT
-    // ======================================
-
-    const editButton =
-        appointmentCard.querySelector(
-            ".edit-btn"
-        );
-
-
-    editButton.addEventListener(
-        "click",
-        function () {
-
-            patientNameInput.value =
-                appointment.patientName;
-
-
-            doctorSelect.value =
-                appointment.doctor;
-
-
-            dateInput.value =
-                appointment.date;
-
-
-            updateTimeSlots();
-
-
-            timeSelect.value =
-                appointment.time;
-
-
-            reasonInput.value =
-                appointment.reason;
-
-
-            appointments =
-                appointments.filter(
-                    function (item) {
-
-                        return item.id !==
-                            appointment.id;
-
-                    }
+            const card =
+                document.createElement(
+                    "div"
                 );
 
 
-            localStorage.setItem(
-                "appointments",
-                JSON.stringify(appointments)
-            );
+            card.className =
+                "appointment-card";
 
 
-            appointmentCard.remove();
+            // STATUS
 
+            let statusClass =
+                "appointment-pending";
 
-            document
-                .getElementById("booking")
-                .scrollIntoView({
-                    behavior: "smooth"
-                });
-
-        }
-    );
-
-
-    // ======================================
-    // CANCEL
-    // ======================================
-
-    const cancelButton =
-        appointmentCard.querySelector(
-            ".cancel-btn"
-        );
-
-
-    cancelButton.addEventListener(
-        "click",
-        function () {
-
-            const confirmed =
-                confirm(
-                    "Are you sure you want to cancel this appointment?"
-                );
-
-
-            if (!confirmed) {
-                return;
-            }
-
-
-            appointments =
-                appointments.filter(
-                    function (item) {
-
-                        return item.id !==
-                            appointment.id;
-
-                    }
-                );
-
-
-            localStorage.setItem(
-                "appointments",
-                JSON.stringify(appointments)
-            );
-
-
-            appointmentCard.remove();
+            let statusIcon =
+                "🟡";
 
 
             if (
-                appointments.length === 0
+                appointment.status ===
+                "Confirmed"
             ) {
 
-                appointmentsList.innerHTML = `
+                statusClass =
+                    "appointment-confirmed";
 
-                    <p id="no-appointments">
-                        No appointments booked yet.
-                    </p>
-
-                `;
+                statusIcon =
+                    "🟢";
 
             }
 
 
-            updateTimeSlots();
+            if (
+                appointment.status ===
+                "Cancelled"
+            ) {
+
+                statusClass =
+                    "appointment-cancelled";
+
+                statusIcon =
+                    "🔴";
+
+            }
+
+
+            card.innerHTML = `
+
+                <div class="appointment-header">
+
+                    <h3>
+                        ${appointment.doctor}
+                    </h3>
+
+                    <span
+                        class="${statusClass}"
+                    >
+                        ${statusIcon}
+                        ${appointment.status}
+                    </span>
+
+                </div>
+
+
+                <div class="appointment-details">
+
+                    <p>
+                        📅
+                        <strong>Date:</strong>
+                        ${appointment.date}
+                    </p>
+
+                    <p>
+                        🕐
+                        <strong>Time:</strong>
+                        ${appointment.time}
+                    </p>
+
+                    <p>
+                        📝
+                        <strong>Reason:</strong>
+                        ${appointment.reason}
+                    </p>
+
+                </div>
+
+
+                ${
+                    appointment.status !==
+                    "Cancelled"
+
+                    ?
+
+                    `
+                    <button
+                        class="cancel-appointment"
+                        data-id="${appointment.id}"
+                    >
+                        Cancel Appointment
+                    </button>
+                    `
+
+                    :
+
+                    ""
+                }
+
+            `;
+
+
+            appointmentsList.appendChild(
+                card
+            );
 
         }
     );
 
-
-    appointmentsList.appendChild(
-        appointmentCard
-    );
-
 }
+
+
+// ==========================================
+// CANCEL APPOINTMENT
+// ==========================================
+
+appointmentsList.addEventListener(
+    "click",
+    function (event) {
+
+        if (
+            !event.target.classList.contains(
+                "cancel-appointment"
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        const appointmentId =
+            Number(
+                event.target.dataset.id
+            );
+
+
+        const confirmed =
+            confirm(
+                "Are you sure you want to cancel this appointment?"
+            );
+
+
+        if (!confirmed) {
+
+            return;
+
+        }
+
+
+        const appointments =
+            getAppointments();
+
+
+        const appointment =
+            appointments.find(
+                function (item) {
+
+                    return item.id ===
+                        appointmentId;
+
+                }
+            );
+
+
+        if (!appointment) {
+
+            return;
+
+        }
+
+
+        appointment.status =
+            "Cancelled";
+
+
+        saveAppointments(
+            appointments
+        );
+
+
+        displayAppointments();
+
+        generateTimeSlots();
+
+    }
+);
+
+
+// ==========================================
+// INITIAL DISPLAY
+// ==========================================
+
+displayAppointments();// ==========================================
+// BOOK WITH DOCTOR BUTTONS
+// ==========================================
+
+const doctorButtons =
+    document.querySelectorAll(".doctor-button");
+
+
+doctorButtons.forEach(
+    function (button) {
+
+        button.addEventListener(
+            "click",
+            function () {
+
+                const selectedDoctor =
+                    button.getAttribute(
+                        "data-doctor"
+                    );
+
+
+                // Select the doctor
+                doctorSelect.value =
+                    selectedDoctor;
+
+
+                // Generate available times
+                generateTimeSlots();
+
+
+                // Scroll to booking form
+                document
+                    .getElementById("booking")
+                    .scrollIntoView({
+                        behavior: "smooth"
+                    });
+
+            }
+        );
+
+    }
+);

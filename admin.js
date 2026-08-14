@@ -1,11 +1,11 @@
 // ==========================================
 // CAREPOINT CLINIC
-// ADMIN DASHBOARD JAVASCRIPT
+// ADMIN DASHBOARD
 // ==========================================
 
 
 // ==========================================
-// GET HTML ELEMENTS
+// GET ELEMENTS
 // ==========================================
 
 const totalAppointments =
@@ -37,7 +37,7 @@ const refreshButton =
 
 
 // ==========================================
-// GET APPOINTMENTS
+// GET APPOINTMENTS FROM LOCAL STORAGE
 // ==========================================
 
 function getAppointments() {
@@ -55,14 +55,32 @@ function getAppointments() {
 
     try {
 
-        return JSON.parse(
-            savedAppointments
+        const appointments =
+            JSON.parse(savedAppointments);
+
+
+        // Make sure every old appointment
+        // has a status.
+
+        return appointments.map(
+            function (appointment) {
+
+                if (!appointment.status) {
+
+                    appointment.status =
+                        "Confirmed";
+
+                }
+
+                return appointment;
+
+            }
         );
 
     } catch (error) {
 
         console.error(
-            "Could not read appointments:",
+            "Error loading appointments:",
             error
         );
 
@@ -74,7 +92,23 @@ function getAppointments() {
 
 
 // ==========================================
-// DISPLAY DASHBOARD
+// SAVE APPOINTMENTS
+// ==========================================
+
+function saveAppointments(
+    appointments
+) {
+
+    localStorage.setItem(
+        "appointments",
+        JSON.stringify(appointments)
+    );
+
+}
+
+
+// ==========================================
+// UPDATE DASHBOARD
 // ==========================================
 
 function updateDashboard() {
@@ -83,17 +117,18 @@ function updateDashboard() {
         getAppointments();
 
 
-    // --------------------------------------
-    // TOTAL APPOINTMENTS
-    // --------------------------------------
+    saveAppointments(
+        appointments
+    );
+
+
+    // TOTAL
 
     totalAppointments.textContent =
         appointments.length;
 
 
-    // --------------------------------------
-    // TODAY'S APPOINTMENTS
-    // --------------------------------------
+    // TODAY
 
     const today =
         new Date()
@@ -102,31 +137,37 @@ function updateDashboard() {
 
 
     const todayCount =
-        appointments.filter(function (appointment) {
+        appointments.filter(
+            function (appointment) {
 
-            return appointment.date === today;
+                return appointment.date === today;
 
-        }).length;
+            }
+        ).length;
 
 
     todayAppointments.textContent =
         todayCount;
 
 
-    // --------------------------------------
-    // CONFIRMED APPOINTMENTS
-    // --------------------------------------
+    // CONFIRMED
 
-    // Every appointment created by our
-    // booking system is currently confirmed.
+    const confirmedCount =
+        appointments.filter(
+            function (appointment) {
+
+                return appointment.status ===
+                    "Confirmed";
+
+            }
+        ).length;
+
 
     confirmedAppointments.textContent =
-        appointments.length;
+        confirmedCount;
 
 
-    // --------------------------------------
-    // DISPLAY TABLE
-    // --------------------------------------
+    // TABLE
 
     displayAppointments(
         appointments
@@ -146,10 +187,6 @@ function displayAppointments(
     appointmentsList.innerHTML = "";
 
 
-    // --------------------------------------
-    // NO RESULTS
-    // --------------------------------------
-
     if (appointments.length === 0) {
 
         noAppointments.style.display =
@@ -164,15 +201,39 @@ function displayAppointments(
         "none";
 
 
-    // --------------------------------------
-    // CREATE TABLE ROWS
-    // --------------------------------------
-
     appointments.forEach(
         function (appointment) {
 
             const row =
                 document.createElement("tr");
+
+
+            // STATUS CLASS
+
+            let statusClass =
+                "status-pending";
+
+
+            if (
+                appointment.status ===
+                "Confirmed"
+            ) {
+
+                statusClass =
+                    "status-confirmed";
+
+            }
+
+
+            if (
+                appointment.status ===
+                "Cancelled"
+            ) {
+
+                statusClass =
+                    "status-cancelled";
+
+            }
 
 
             row.innerHTML = `
@@ -198,14 +259,59 @@ function displayAppointments(
                 </td>
 
                 <td>
-                    <span class="status-confirmed">
-                        Confirmed
-                    </span>
+
+                    <select
+                        class="status-select ${statusClass}"
+                        data-id="${appointment.id}"
+                    >
+
+                        <option
+                            value="Pending"
+                            ${
+                                appointment.status ===
+                                "Pending"
+                                ? "selected"
+                                : ""
+                            }
+                        >
+                            Pending
+                        </option>
+
+
+                        <option
+                            value="Confirmed"
+                            ${
+                                appointment.status ===
+                                "Confirmed"
+                                ? "selected"
+                                : ""
+                            }
+                        >
+                            Confirmed
+                        </option>
+
+
+                        <option
+                            value="Cancelled"
+                            ${
+                                appointment.status ===
+                                "Cancelled"
+                                ? "selected"
+                                : ""
+                            }
+                        >
+                            Cancelled
+                        </option>
+
+                    </select>
+
                 </td>
+
 
                 <td>
 
                     <button
+                        type="button"
                         class="admin-delete-btn"
                         data-id="${appointment.id}"
                     >
@@ -228,89 +334,69 @@ function displayAppointments(
 
 
 // ==========================================
-// SEARCH + FILTER
+// CHANGE STATUS
 // ==========================================
 
-function filterAppointments() {
+appointmentsList.addEventListener(
+    "change",
+    function (event) {
 
-    const appointments =
-        getAppointments();
+        if (
+            !event.target.classList.contains(
+                "status-select"
+            )
+        ) {
 
+            return;
 
-    const searchTerm =
-        searchInput.value
-            .toLowerCase()
-            .trim();
-
-
-    const selectedDoctor =
-        doctorFilter.value;
-
-
-    const selectedDate =
-        dateFilter.value;
+        }
 
 
-    const filtered =
-        appointments.filter(
-            function (appointment) {
+        const appointmentId =
+            Number(
+                event.target.dataset.id
+            );
 
 
-                // SEARCH
-
-                const matchesSearch =
-                    appointment.patientName
-                        .toLowerCase()
-                        .includes(searchTerm)
-
-                    ||
-
-                    appointment.doctor
-                        .toLowerCase()
-                        .includes(searchTerm)
-
-                    ||
-
-                    appointment.reason
-                        .toLowerCase()
-                        .includes(searchTerm);
+        const newStatus =
+            event.target.value;
 
 
-                // DOCTOR FILTER
-
-                const matchesDoctor =
-                    !selectedDoctor
-                    ||
-                    appointment.doctor ===
-                    selectedDoctor;
+        const appointments =
+            getAppointments();
 
 
-                // DATE FILTER
+        const appointment =
+            appointments.find(
+                function (item) {
 
-                const matchesDate =
-                    !selectedDate
-                    ||
-                    appointment.date ===
-                    selectedDate;
+                    return item.id ===
+                        appointmentId;
+
+                }
+            );
 
 
-                return (
-                    matchesSearch
-                    &&
-                    matchesDoctor
-                    &&
-                    matchesDate
-                );
+        if (!appointment) {
 
-            }
+            return;
+
+        }
+
+
+        appointment.status =
+            newStatus;
+
+
+        saveAppointments(
+            appointments
         );
 
 
-    displayAppointments(
-        filtered
-    );
+        updateDashboard();
 
-}
+    }
+);
 
 
 // ==========================================
@@ -320,7 +406,6 @@ function filterAppointments() {
 appointmentsList.addEventListener(
     "click",
     function (event) {
-
 
         if (
             !event.target.classList.contains(
@@ -367,9 +452,8 @@ appointmentsList.addEventListener(
             );
 
 
-        localStorage.setItem(
-            "appointments",
-            JSON.stringify(appointments)
+        saveAppointments(
+            appointments
         );
 
 
@@ -380,16 +464,106 @@ appointmentsList.addEventListener(
 
 
 // ==========================================
-// SEARCH EVENT
+// FILTER APPOINTMENTS
+// ==========================================
+
+function filterAppointments() {
+
+    const appointments =
+        getAppointments();
+
+
+    const searchTerm =
+        searchInput.value
+            .toLowerCase()
+            .trim();
+
+
+    const selectedDoctor =
+        doctorFilter.value;
+
+
+    const selectedDate =
+        dateFilter.value;
+
+
+    const filtered =
+        appointments.filter(
+            function (appointment) {
+
+
+                const patientName =
+                    String(
+                        appointment.patientName || ""
+                    ).toLowerCase();
+
+
+                const doctorName =
+                    String(
+                        appointment.doctor || ""
+                    ).toLowerCase();
+
+
+                const reason =
+                    String(
+                        appointment.reason || ""
+                    ).toLowerCase();
+
+
+                const matchesSearch =
+                    patientName.includes(
+                        searchTerm
+                    )
+                    ||
+                    doctorName.includes(
+                        searchTerm
+                    )
+                    ||
+                    reason.includes(
+                        searchTerm
+                    );
+
+
+                const matchesDoctor =
+                    !selectedDoctor
+                    ||
+                    appointment.doctor ===
+                    selectedDoctor;
+
+
+                const matchesDate =
+                    !selectedDate
+                    ||
+                    appointment.date ===
+                    selectedDate;
+
+
+                return (
+                    matchesSearch
+                    &&
+                    matchesDoctor
+                    &&
+                    matchesDate
+                );
+
+            }
+        );
+
+
+    displayAppointments(
+        filtered
+    );
+
+}
+
+
+// ==========================================
+// SEARCH
 // ==========================================
 
 searchInput.addEventListener(
     "input",
-    function () {
-
-        filterAppointments();
-
-    }
+    filterAppointments
 );
 
 
@@ -399,11 +573,7 @@ searchInput.addEventListener(
 
 doctorFilter.addEventListener(
     "change",
-    function () {
-
-        filterAppointments();
-
-    }
+    filterAppointments
 );
 
 
@@ -413,30 +583,22 @@ doctorFilter.addEventListener(
 
 dateFilter.addEventListener(
     "change",
-    function () {
-
-        filterAppointments();
-
-    }
+    filterAppointments
 );
 
 
 // ==========================================
-// REFRESH BUTTON
+// REFRESH
 // ==========================================
 
 refreshButton.addEventListener(
     "click",
-    function () {
-
-        updateDashboard();
-
-    }
+    updateDashboard
 );
 
 
 // ==========================================
-// INITIAL LOAD
+// INITIALIZE
 // ==========================================
 
 updateDashboard();
