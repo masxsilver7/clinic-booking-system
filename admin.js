@@ -1,13 +1,23 @@
-// ======================================================
+// ==========================================
 // CAREPOINT CLINIC
-// ADMIN DASHBOARD - COMPLETE JAVASCRIPT
-// ======================================================
+// ADMIN DASHBOARD SCRIPT
+// MongoDB + Express Version
+// ==========================================
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
 
-    // ==================================================
+    console.log("CarePoint Admin Dashboard loaded.");
+
+    // ==========================================
+    // API
+    // ==========================================
+
+    const API_URL = "https://carepoint-backend-zu71.onrender.com";
+
+
+    // ==========================================
     // ELEMENTS
-    // ==================================================
+    // ==========================================
 
     const totalAppointments =
         document.getElementById("total-appointments");
@@ -17,6 +27,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const confirmedAppointments =
         document.getElementById("confirmed-appointments");
+
+    const doctorCount =
+        document.getElementById("doctor-count");
 
     const appointmentsList =
         document.getElementById("admin-appointments-list");
@@ -36,18 +49,26 @@ document.addEventListener("DOMContentLoaded", function () {
     const refreshButton =
         document.getElementById("refresh-appointments");
 
+
+    // Doctor elements
+
     const doctorsGrid =
         document.getElementById("doctors-grid");
 
-    const doctorCount =
-        document.getElementById("doctor-count");
+    const addDoctorButton =
+        document.getElementById("add-doctor-btn");
 
-    // ==================================================
-    // DOCTOR MODAL
-    // ==================================================
+
+    // Edit doctor modal
 
     const doctorModal =
         document.getElementById("doctor-modal");
+
+    const closeDoctorModal =
+        document.getElementById("close-doctor-modal");
+
+    const cancelDoctorEdit =
+        document.getElementById("cancel-doctor-edit");
 
     const editDoctorForm =
         document.getElementById("edit-doctor-form");
@@ -64,236 +85,301 @@ document.addEventListener("DOMContentLoaded", function () {
     const editEndTime =
         document.getElementById("edit-end-time");
 
-    const closeDoctorModal =
-        document.getElementById("close-doctor-modal");
 
-    const cancelDoctorEdit =
-        document.getElementById("cancel-doctor-edit");
+    // Add doctor modal
 
-    const addDoctorButton =
-        document.getElementById("add-doctor-btn");
+    const addDoctorModal =
+        document.getElementById("add-doctor-modal");
 
+    const closeAddDoctorModal =
+        document.getElementById("close-add-doctor-modal");
 
-    // ==================================================
-    // CHECK MODAL
-    // ==================================================
+    const cancelAddDoctor =
+        document.getElementById("cancel-add-doctor");
 
-    if (!doctorModal) {
+    const addDoctorForm =
+        document.getElementById("add-doctor-form");
 
-        console.error(
-            "ERROR: doctor-modal was not found."
-        );
+    const addDoctorName =
+        document.getElementById("add-doctor-name");
 
-        return;
+    const addDoctorSpecialty =
+        document.getElementById("add-doctor-specialty");
 
-    }
+    const addStartTime =
+        document.getElementById("add-start-time");
 
-
-    if (!editDoctorForm) {
-
-        console.error(
-            "ERROR: edit-doctor-form was not found."
-        );
-
-        return;
-
-    }
+    const addEndTime =
+        document.getElementById("add-end-time");
 
 
-    // ==================================================
-    // DOCTORS
-    // ==================================================
+    // ==========================================
+    // DATA
+    // ==========================================
 
-    let doctors = [
+    let appointments = [];
+    let doctors = [];
+    let editingDoctorId = null;
 
-        {
-            id: 1,
-            name: "Dr. Sarah Johnson",
-            specialty: "General Physician",
-            days: [
-                "Monday",
-                "Wednesday",
-                "Friday"
-            ],
-            startTime: "09:00",
-            endTime: "15:00"
-        },
 
-        {
-            id: 2,
-            name: "Dr. Michael Brown",
-            specialty: "Cardiologist",
-            days: [
-                "Tuesday",
-                "Thursday"
-            ],
-            startTime: "10:00",
-            endTime: "16:00"
-        },
+    // ==========================================
+    // LOAD APPOINTMENTS
+    // ==========================================
 
-        {
-            id: 3,
-            name: "Dr. Emily Williams",
-            specialty: "Pediatrician",
-            days: [
-                "Monday",
-                "Tuesday",
-                "Thursday"
-            ],
-            startTime: "08:00",
-            endTime: "14:00"
+    async function loadAppointments() {
+
+        try {
+
+            console.log(
+                "Loading appointments..."
+            );
+
+            const response =
+                await fetch(
+                    `${API_URL}/api/appointments`
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    `Server returned ${response.status}`
+                );
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                !data.success ||
+                !Array.isArray(data.appointments)
+            ) {
+
+                throw new Error(
+                    "Invalid appointments response."
+                );
+
+            }
+
+
+            appointments =
+                data.appointments;
+
+
+            console.log(
+                "Appointments loaded:",
+                appointments.length
+            );
+
+
+            renderDashboard();
+
+
+        } catch (error) {
+
+            console.error(
+                "Failed to load appointments:",
+                error
+            );
+
+
+            if (appointmentsList) {
+
+                appointmentsList.innerHTML = `
+                    <tr>
+                        <td
+                            colspan="7"
+                            style="text-align:center; padding:30px;"
+                        >
+                            <strong>
+                                Unable to load appointments
+                            </strong>
+
+                            <br>
+
+                            <small>
+                                ${escapeHTML(error.message)}
+                            </small>
+                        </td>
+                    </tr>
+                `;
+
+            }
+
         }
 
-    ];
+    }
 
 
-    // ==================================================
+    // ==========================================
     // LOAD DOCTORS
-    // ==================================================
+    // ==========================================
 
-    function loadDoctors() {
+    async function loadDoctors() {
 
-        const savedDoctors =
-            localStorage.getItem(
-                "carepointDoctors"
+        try {
+
+            console.log(
+                "Loading doctors..."
             );
 
 
-        if (!savedDoctors) {
+            const response =
+                await fetch(
+                    `${API_URL}/api/doctors`
+                );
 
-            localStorage.setItem(
-                "carepointDoctors",
-                JSON.stringify(doctors)
+
+            if (!response.ok) {
+
+                throw new Error(
+                    `Server returned ${response.status}`
+                );
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                !data.success ||
+                !Array.isArray(data.doctors)
+            ) {
+
+                throw new Error(
+                    "Invalid doctors response."
+                );
+
+            }
+
+
+            doctors =
+                data.doctors;
+
+
+            console.log(
+                "Doctors loaded:",
+                doctors.length
             );
 
+
+            updateDoctorCount();
+
+            populateDoctorFilter();
+
+            renderDoctors();
+
+
+        } catch (error) {
+
+            console.error(
+                "Failed to load doctors:",
+                error
+            );
+
+        }
+
+    }
+
+
+    // ==========================================
+    // UPDATE DOCTOR COUNT
+    // ==========================================
+
+    function updateDoctorCount() {
+
+        if (!doctorCount) {
             return;
-
         }
 
 
-        try {
-
-            const parsed =
-                JSON.parse(savedDoctors);
-
-
-            if (Array.isArray(parsed)) {
-
-                doctors = parsed;
-
-            }
-
-        } catch (error) {
-
-            console.error(
-                "Could not load doctors:",
-                error
-            );
-
-        }
+        doctorCount.textContent =
+            doctors.length;
 
     }
 
 
-    // ==================================================
-    // SAVE DOCTORS
-    // ==================================================
+    // ==========================================
+    // POPULATE DOCTOR FILTER
+    // ==========================================
 
-    function saveDoctors() {
+    function populateDoctorFilter() {
 
-        localStorage.setItem(
-            "carepointDoctors",
-            JSON.stringify(doctors)
-        );
-
-    }
-
-
-    // ==================================================
-    // APPOINTMENTS
-    // ==================================================
-
-    function getAppointments() {
-
-        const saved =
-            localStorage.getItem(
-                "appointments"
-            );
-
-
-        if (!saved) {
-
-            return [];
-
+        if (!doctorFilter) {
+            return;
         }
 
 
-        try {
-
-            const appointments =
-                JSON.parse(saved);
-
-
-            if (!Array.isArray(appointments)) {
-
-                return [];
-
-            }
+        doctorFilter.innerHTML = `
+            <option value="">
+                All Doctors
+            </option>
+        `;
 
 
-            return appointments.map(
-                function (appointment) {
+        doctors.forEach((doctor) => {
 
-                    if (!appointment.status) {
+            const option =
+                document.createElement("option");
 
-                        appointment.status =
-                            "Confirmed";
 
-                    }
+            option.value =
+                doctor.name;
 
-                    return appointment;
 
-                }
+            option.textContent =
+                doctor.name;
+
+
+            doctorFilter.appendChild(
+                option
             );
 
-        } catch (error) {
-
-            console.error(
-                "Error loading appointments:",
-                error
-            );
-
-            return [];
-
-        }
+        });
 
     }
 
 
-    // ==================================================
-    // SAVE APPOINTMENTS
-    // ==================================================
+    // ==========================================
+    // DASHBOARD
+    // ==========================================
 
-    function saveAppointments(
-        appointments
-    ) {
+    function renderDashboard() {
 
-        localStorage.setItem(
-            "appointments",
-            JSON.stringify(appointments)
-        );
+        updateDashboardStats();
+
+        renderAppointments();
 
     }
 
 
-    // ==================================================
-    // UPDATE DASHBOARD
-    // ==================================================
+    // ==========================================
+    // DASHBOARD STATISTICS
+    // ==========================================
 
-    function updateDashboard() {
+    function updateDashboardStats() {
 
-        const appointments =
-            getAppointments();
+        const today =
+            getTodayString();
+
+
+        const todayCount =
+            appointments.filter(
+                (appointment) =>
+                    appointment.date === today
+            ).length;
+
+
+        const confirmedCount =
+            appointments.filter(
+                (appointment) =>
+                    appointment.status === "Confirmed"
+            ).length;
 
 
         if (totalAppointments) {
@@ -304,39 +390,12 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        const today =
-            new Date()
-                .toISOString()
-                .split("T")[0];
-
-
-        const todayCount =
-            appointments.filter(
-                function (appointment) {
-
-                    return appointment.date === today;
-
-                }
-            ).length;
-
-
         if (todayAppointments) {
 
             todayAppointments.textContent =
                 todayCount;
 
         }
-
-
-        const confirmedCount =
-            appointments.filter(
-                function (appointment) {
-
-                    return appointment.status ===
-                        "Confirmed";
-
-                }
-            ).length;
 
 
         if (confirmedAppointments) {
@@ -346,33 +405,145 @@ document.addEventListener("DOMContentLoaded", function () {
 
         }
 
+    }
 
-        displayAppointments(
-            appointments
+
+    // ==========================================
+    // TODAY'S DATE
+    // ==========================================
+
+    function getTodayString() {
+
+        const today =
+            new Date();
+
+
+        const year =
+            today.getFullYear();
+
+
+        const month =
+            String(
+                today.getMonth() + 1
+            ).padStart(2, "0");
+
+
+        const day =
+            String(
+                today.getDate()
+            ).padStart(2, "0");
+
+
+        return `${year}-${month}-${day}`;
+
+    }
+
+
+    // ==========================================
+    // FILTER APPOINTMENTS
+    // ==========================================
+
+    function getFilteredAppointments() {
+
+        const search =
+            searchInput
+                ? searchInput.value
+                    .toLowerCase()
+                    .trim()
+                : "";
+
+
+        const selectedDoctor =
+            doctorFilter
+                ? doctorFilter.value
+                : "";
+
+
+        const selectedDate =
+            dateFilter
+                ? dateFilter.value
+                : "";
+
+
+        return appointments.filter(
+            (appointment) => {
+
+                const patientName =
+                    String(
+                        appointment.patientName || ""
+                    ).toLowerCase();
+
+
+                const doctor =
+                    String(
+                        appointment.doctor || ""
+                    ).toLowerCase();
+
+
+                const reason =
+                    String(
+                        appointment.reason || ""
+                    ).toLowerCase();
+
+
+                const matchesSearch =
+                    !search ||
+                    patientName.includes(search) ||
+                    doctor.includes(search) ||
+                    reason.includes(search);
+
+
+                const matchesDoctor =
+                    !selectedDoctor ||
+                    appointment.doctor ===
+                    selectedDoctor;
+
+
+                const matchesDate =
+                    !selectedDate ||
+                    appointment.date ===
+                    selectedDate;
+
+
+                return (
+                    matchesSearch &&
+                    matchesDoctor &&
+                    matchesDate
+                );
+
+            }
         );
 
     }
 
 
-    // ==================================================
-    // DISPLAY APPOINTMENTS
-    // ==================================================
+    // ==========================================
+    // RENDER APPOINTMENTS TABLE
+    // ==========================================
 
-    function displayAppointments(
-        appointments
-    ) {
+    function renderAppointments() {
 
         if (!appointmentsList) {
+
+            console.error(
+                "Appointment table body not found."
+            );
 
             return;
 
         }
 
 
+        const filteredAppointments =
+            getFilteredAppointments();
+
+
         appointmentsList.innerHTML = "";
 
 
-        if (appointments.length === 0) {
+        if (
+            filteredAppointments.length === 0
+        ) {
 
             if (noAppointments) {
 
@@ -394,502 +565,726 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        appointments.forEach(
-            function (appointment) {
+        filteredAppointments
+            .slice()
+            .sort(
+                (a, b) =>
+                    new Date(
+                        b.createdAt || 0
+                    ) -
+                    new Date(
+                        a.createdAt || 0
+                    )
+            )
+            .forEach(
+                (appointment) => {
 
-                const row =
-                    document.createElement("tr");
+                    const row =
+                        document.createElement("tr");
 
 
-                let statusClass =
-                    "status-pending";
+                    const status =
+                        appointment.status ||
+                        "Pending";
 
 
-                if (
-                    appointment.status ===
-                    "Confirmed"
-                ) {
+                    const appointmentId =
+                        appointment._id ||
+                        appointment.id ||
+                        "";
 
-                    statusClass =
-                        "status-confirmed";
+
+                    row.innerHTML = `
+
+                        <td>
+                            <strong>
+                                ${escapeHTML(
+                                    appointment.patientName
+                                )}
+                            </strong>
+                        </td>
+
+
+                        <td>
+                            ${escapeHTML(
+                                appointment.doctor
+                            )}
+                        </td>
+
+
+                        <td>
+                            ${escapeHTML(
+                                appointment.date
+                            )}
+                        </td>
+
+
+                        <td>
+                            ${escapeHTML(
+                                formatTime(
+                                    appointment.time
+                                )
+                            )}
+                        </td>
+
+
+                        <td>
+                            ${escapeHTML(
+                                appointment.reason
+                            )}
+                        </td>
+
+
+                        <td>
+
+                            <span
+                                class="status-badge status-${getStatusClass(status)}"
+                            >
+                                ${escapeHTML(status)}
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <div
+                                class="appointment-table-actions"
+                            >
+
+                                <button
+                                    type="button"
+                                    class="confirm-btn"
+                                    data-id="${escapeHTML(
+                                        appointmentId
+                                    )}"
+                                    ${
+                                        status === "Confirmed"
+                                            ? "disabled"
+                                            : ""
+                                    }
+                                >
+                                    Confirm
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    class="cancel-btn"
+                                    data-id="${escapeHTML(
+                                        appointmentId
+                                    )}"
+                                    ${
+                                        status === "Cancelled"
+                                            ? "disabled"
+                                            : ""
+                                    }
+                                >
+                                    Cancel
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    class="delete-btn"
+                                    data-id="${escapeHTML(
+                                        appointmentId
+                                    )}"
+                                >
+                                    Delete
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    `;
+
+
+                    appointmentsList.appendChild(
+                        row
+                    );
 
                 }
+            );
 
 
-                if (
-                    appointment.status ===
-                    "Cancelled"
-                ) {
-
-                    statusClass =
-                        "status-cancelled";
-
-                }
-
-
-                row.innerHTML = `
-
-                    <td>
-                        ${appointment.patientName || "N/A"}
-                    </td>
-
-                    <td>
-                        ${appointment.doctor || "N/A"}
-                    </td>
-
-                    <td>
-                        ${appointment.date || "N/A"}
-                    </td>
-
-                    <td>
-                        ${appointment.time || "N/A"}
-                    </td>
-
-                    <td>
-                        ${appointment.reason || "N/A"}
-                    </td>
-
-                    <td>
-
-                        <select
-                            class="status-select ${statusClass}"
-                            data-id="${appointment.id}"
-                        >
-
-                            <option
-                                value="Pending"
-                                ${
-                                    appointment.status ===
-                                    "Pending"
-                                    ? "selected"
-                                    : ""
-                                }
-                            >
-                                Pending
-                            </option>
-
-                            <option
-                                value="Confirmed"
-                                ${
-                                    appointment.status ===
-                                    "Confirmed"
-                                    ? "selected"
-                                    : ""
-                                }
-                            >
-                                Confirmed
-                            </option>
-
-                            <option
-                                value="Cancelled"
-                                ${
-                                    appointment.status ===
-                                    "Cancelled"
-                                    ? "selected"
-                                    : ""
-                                }
-                            >
-                                Cancelled
-                            </option>
-
-                        </select>
-
-                    </td>
-
-                    <td>
-
-                        <button
-                            type="button"
-                            class="admin-delete-btn"
-                            data-id="${appointment.id}"
-                        >
-                            Delete
-                        </button>
-
-                    </td>
-
-                `;
-
-
-                appointmentsList.appendChild(
-                    row
-                );
-
-            }
-        );
+        attachAppointmentActions();
 
     }
 
 
-    // ==================================================
-    // APPOINTMENT STATUS
-    // ==================================================
+    // ==========================================
+    // STATUS CLASS
+    // ==========================================
 
-    if (appointmentsList) {
+    function getStatusClass(status) {
 
-        appointmentsList.addEventListener(
-            "change",
-            function (event) {
-
-                if (
-                    !event.target.classList.contains(
-                        "status-select"
-                    )
-                ) {
-
-                    return;
-
-                }
-
-
-                const appointmentId =
-                    Number(
-                        event.target.dataset.id
-                    );
-
-
-                const newStatus =
-                    event.target.value;
-
-
-                const appointments =
-                    getAppointments();
-
-
-                const appointment =
-                    appointments.find(
-                        function (item) {
-
-                            return Number(item.id) ===
-                                appointmentId;
-
-                        }
-                    );
-
-
-                if (!appointment) {
-
-                    return;
-
-                }
-
-
-                appointment.status =
-                    newStatus;
-
-
-                saveAppointments(
-                    appointments
-                );
-
-
-                updateDashboard();
-
-            }
-        );
-
-
-        // ==================================================
-        // DELETE APPOINTMENT
-        // ==================================================
-
-        appointmentsList.addEventListener(
-            "click",
-            function (event) {
-
-                if (
-                    !event.target.classList.contains(
-                        "admin-delete-btn"
-                    )
-                ) {
-
-                    return;
-
-                }
-
-
-                const appointmentId =
-                    Number(
-                        event.target.dataset.id
-                    );
-
-
-                if (
-                    !confirm(
-                        "Are you sure you want to delete this appointment?"
-                    )
-                ) {
-
-                    return;
-
-                }
-
-
-                let appointments =
-                    getAppointments();
-
-
-                appointments =
-                    appointments.filter(
-                        function (appointment) {
-
-                            return Number(
-                                appointment.id
-                            ) !== appointmentId;
-
-                        }
-                    );
-
-
-                saveAppointments(
-                    appointments
-                );
-
-
-                updateDashboard();
-
-            }
-        );
+        return String(status)
+            .toLowerCase()
+            .replace(
+                /\s+/g,
+                "-"
+            );
 
     }
 
 
-    // ==================================================
-    // FILTER
-    // ==================================================
+    // ==========================================
+    // FORMAT TIME
+    // ==========================================
 
-    function filterAppointments() {
+    function formatTime(time) {
 
-        const appointments =
-            getAppointments();
-
-
-        const searchTerm =
-            searchInput
-                ? searchInput.value
-                    .toLowerCase()
-                    .trim()
-                : "";
+        if (!time) {
+            return "";
+        }
 
 
-        const selectedDoctor =
-            doctorFilter
-                ? doctorFilter.value
-                : "";
+        const parts =
+            String(time).split(":");
 
 
-        const selectedDate =
-            dateFilter
-                ? dateFilter.value
-                : "";
+        if (parts.length < 2) {
+            return time;
+        }
 
 
-        const filtered =
-            appointments.filter(
-                function (appointment) {
-
-                    const patientName =
-                        String(
-                            appointment.patientName || ""
-                        ).toLowerCase();
+        let hour =
+            Number(parts[0]);
 
 
-                    const doctorName =
-                        String(
-                            appointment.doctor || ""
-                        ).toLowerCase();
+        const minute =
+            parts[1];
 
 
-                    const reason =
-                        String(
-                            appointment.reason || ""
-                        ).toLowerCase();
+        const period =
+            hour >= 12
+                ? "PM"
+                : "AM";
 
 
-                    const matchesSearch =
-                        patientName.includes(
-                            searchTerm
-                        )
-                        ||
-                        doctorName.includes(
-                            searchTerm
-                        )
-                        ||
-                        reason.includes(
-                            searchTerm
+        hour =
+            hour % 12 || 12;
+
+
+        return `${hour}:${minute} ${period}`;
+
+    }
+
+
+    // ==========================================
+    // APPOINTMENT ACTIONS
+    // ==========================================
+
+    function attachAppointmentActions() {
+
+        document
+            .querySelectorAll(".confirm-btn")
+            .forEach((button) => {
+
+                button.addEventListener(
+                    "click",
+                    async () => {
+
+                        const id =
+                            button.dataset.id;
+
+
+                        if (!id) {
+
+                            alert(
+                                "Appointment ID is missing."
+                            );
+
+                            return;
+
+                        }
+
+
+                        await updateAppointmentStatus(
+                            id,
+                            "Confirmed"
                         );
 
+                    }
+                );
 
-                    const matchesDoctor =
-                        !selectedDoctor ||
-                        appointment.doctor ===
-                        selectedDoctor;
-
-
-                    const matchesDate =
-                        !selectedDate ||
-                        appointment.date ===
-                        selectedDate;
+            });
 
 
-                    return (
-                        matchesSearch &&
-                        matchesDoctor &&
-                        matchesDate
-                    );
+        document
+            .querySelectorAll(".cancel-btn")
+            .forEach((button) => {
 
-                }
-            );
+                button.addEventListener(
+                    "click",
+                    async () => {
+
+                        const id =
+                            button.dataset.id;
 
 
-        displayAppointments(
-            filtered
-        );
+                        if (!id) {
+
+                            alert(
+                                "Appointment ID is missing."
+                            );
+
+                            return;
+
+                        }
+
+
+                        await updateAppointmentStatus(
+                            id,
+                            "Cancelled"
+                        );
+
+                    }
+                );
+
+            });
+
+
+        document
+            .querySelectorAll(".delete-btn")
+            .forEach((button) => {
+
+                button.addEventListener(
+                    "click",
+                    async () => {
+
+                        const id =
+                            button.dataset.id;
+
+
+                        if (!id) {
+
+                            alert(
+                                "Appointment ID is missing."
+                            );
+
+                            return;
+
+                        }
+
+
+                        await deleteAppointment(
+                            id
+                        );
+
+                    }
+                );
+
+            });
 
     }
 
 
-    if (searchInput) {
+    // ==========================================
+    // UPDATE APPOINTMENT STATUS
+    // ==========================================
 
-        searchInput.addEventListener(
-            "input",
-            filterAppointments
-        );
-
-    }
-
-
-    if (doctorFilter) {
-
-        doctorFilter.addEventListener(
-            "change",
-            filterAppointments
-        );
-
-    }
-
-
-    if (dateFilter) {
-
-        dateFilter.addEventListener(
-            "change",
-            filterAppointments
-        );
-
-    }
-
-
-    if (refreshButton) {
-
-        refreshButton.addEventListener(
-            "click",
-            updateDashboard
-        );
-
-    }
-
-
-    // ==================================================
-    // FIND DOCTOR
-    // ==================================================
-
-    function getDoctorByName(
-        name
+    async function updateAppointmentStatus(
+        id,
+        status
     ) {
 
-        return doctors.find(
-            function (doctor) {
+        try {
 
-                return doctor.name === name;
+            const response =
+                await fetch(
+                    `${API_URL}/api/appointments/${id}/status`,
+                    {
+                        method: "PUT",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            status: status
+                        })
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.message ||
+                    `Server returned ${response.status}`
+                );
 
             }
-        );
-
-    }
 
 
-    // ==================================================
-    // GET SELECTED DAYS
-    // ==================================================
+            if (!data.success) {
 
-    function getSelectedDays() {
+                throw new Error(
+                    data.message ||
+                    "Failed to update appointment."
+                );
 
-        const checkboxes =
-            document.querySelectorAll(
-                ".doctor-day"
+            }
+
+
+            await loadAppointments();
+
+
+        } catch (error) {
+
+            console.error(
+                "Failed to update appointment:",
+                error
             );
 
 
-        const days = [];
+            alert(
+                "Failed to update appointment.\n\n" +
+                error.message
+            );
 
-
-        checkboxes.forEach(
-            function (checkbox) {
-
-                if (checkbox.checked) {
-
-                    days.push(
-                        checkbox.value
-                    );
-
-                }
-
-            }
-        );
-
-
-        return days;
+        }
 
     }
 
 
-    // ==================================================
-    // SET SELECTED DAYS
-    // ==================================================
+    // ==========================================
+    // DELETE APPOINTMENT
+    // ==========================================
 
-    function setSelectedDays(
-        days
-    ) {
+    async function deleteAppointment(id) {
 
-        const checkboxes =
-            document.querySelectorAll(
-                ".doctor-day"
+        const confirmed =
+            window.confirm(
+                "Are you sure you want to delete this appointment?"
             );
 
 
-        checkboxes.forEach(
-            function (checkbox) {
+        if (!confirmed) {
+            return;
+        }
 
-                checkbox.checked =
-                    days.includes(
-                        checkbox.value
-                    );
+
+        try {
+
+            const response =
+                await fetch(
+                    `${API_URL}/api/appointments/${id}`,
+                    {
+                        method: "DELETE"
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.message ||
+                    `Server returned ${response.status}`
+                );
 
             }
-        );
+
+
+            if (!data.success) {
+
+                throw new Error(
+                    data.message ||
+                    "Failed to delete appointment."
+                );
+
+            }
+
+
+            await loadAppointments();
+
+
+        } catch (error) {
+
+            console.error(
+                "Failed to delete appointment:",
+                error
+            );
+
+
+            alert(
+                "Failed to delete appointment.\n\n" +
+                error.message
+            );
+
+        }
 
     }
 
 
-    // ==================================================
-    // OPEN DOCTOR MODAL
-    // ==================================================
+    // ==========================================
+    // RENDER DOCTORS
+    // ==========================================
 
-    function openDoctorModal(
-        doctorName
+    function renderDoctors() {
+
+        if (!doctorsGrid) {
+            return;
+        }
+
+
+        doctorsGrid.innerHTML = "";
+
+
+        if (doctors.length === 0) {
+
+            doctorsGrid.innerHTML = `
+                <div class="admin-empty">
+
+                    <div>👨‍⚕️</div>
+
+                    <h3>
+                        No doctors found
+                    </h3>
+
+                    <p>
+                        Add a doctor to your medical team.
+                    </p>
+
+                </div>
+            `;
+
+            return;
+
+        }
+
+
+        doctors.forEach((doctor) => {
+
+            const card =
+                document.createElement("div");
+
+
+            card.className =
+                "admin-doctor-card";
+
+
+            card.dataset.doctor =
+                doctor.name;
+
+
+            const initials =
+                getInitials(
+                    doctor.name
+                );
+
+
+            const days =
+                Array.isArray(doctor.days)
+                    ? doctor.days.join(", ")
+                    : "";
+
+
+            const activeText =
+                doctor.active === false
+                    ? "● Inactive"
+                    : "● Active";
+
+
+            const activeClass =
+                doctor.active === false
+                    ? "doctor-inactive"
+                    : "doctor-active";
+
+
+            card.innerHTML = `
+
+                <div class="admin-doctor-avatar">
+                    ${escapeHTML(initials)}
+                </div>
+
+
+                <div class="admin-doctor-info">
+
+                    <h3>
+                        ${escapeHTML(
+                            doctor.name
+                        )}
+                    </h3>
+
+                    <p>
+                        ${escapeHTML(
+                            doctor.specialty
+                        )}
+                    </p>
+
+                </div>
+
+
+                <div class="admin-doctor-details">
+
+                    <div>
+
+                        <span>📅</span>
+
+                        <p>
+                            ${escapeHTML(days)}
+                        </p>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>🕐</span>
+
+                        <p>
+                            ${escapeHTML(
+                                formatTime(
+                                    doctor.startTime
+                                )
+                            )}
+                            -
+                            ${escapeHTML(
+                                formatTime(
+                                    doctor.endTime
+                                )
+                            )}
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="admin-doctor-footer">
+
+                    <span class="${activeClass}">
+                        ${escapeHTML(activeText)}
+                    </span>
+
+
+                    <button
+                        type="button"
+                        class="edit-doctor-btn"
+                        data-id="${escapeHTML(
+                            doctor._id
+                        )}"
+                    >
+                        Edit
+                    </button>
+
+                </div>
+
+            `;
+
+
+            doctorsGrid.appendChild(
+                card
+            );
+
+        });
+
+
+        attachDoctorEditButtons();
+
+    }
+
+
+    // ==========================================
+    // GET INITIALS
+    // ==========================================
+
+    function getInitials(name) {
+
+        if (!name) {
+            return "DR";
+        }
+
+
+        const cleanName =
+            name
+                .replace(/^Dr\.?\s*/i, "")
+                .trim();
+
+
+        const parts =
+            cleanName.split(/\s+/);
+
+
+        if (parts.length === 1) {
+
+            return parts[0]
+                .substring(0, 2)
+                .toUpperCase();
+
+        }
+
+
+        return (
+            parts[0][0] +
+            parts[parts.length - 1][0]
+        ).toUpperCase();
+
+    }
+
+
+    // ==========================================
+    // EDIT DOCTOR BUTTONS
+    // ==========================================
+
+    function attachDoctorEditButtons() {
+
+        document
+            .querySelectorAll(".edit-doctor-btn")
+            .forEach((button) => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        const doctorId =
+                            button.dataset.id;
+
+
+                        openEditDoctorModal(
+                            doctorId
+                        );
+
+                    }
+                );
+
+            });
+
+    }
+
+
+    // ==========================================
+    // OPEN EDIT DOCTOR MODAL
+    // ==========================================
+
+    function openEditDoctorModal(
+        doctorId
     ) {
 
         const doctor =
-            getDoctorByName(
-                doctorName
+            doctors.find(
+                (item) =>
+                    item._id === doctorId
             );
 
 
         if (!doctor) {
 
-            console.error(
-                "Doctor not found:",
-                doctorName
+            alert(
+                "Doctor not found."
             );
 
             return;
@@ -897,95 +1292,493 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
+        editingDoctorId =
+            doctorId;
+
+
         editDoctorName.value =
-            doctor.name;
+            doctor.name || "";
 
 
         editDoctorSpecialty.value =
-            doctor.specialty;
+            doctor.specialty || "";
 
 
         editStartTime.value =
-            doctor.startTime;
+            doctor.startTime || "";
 
 
         editEndTime.value =
-            doctor.endTime;
+            doctor.endTime || "";
 
 
-        setSelectedDays(
-            doctor.days
-        );
+        document
+            .querySelectorAll(".doctor-day")
+            .forEach((checkbox) => {
 
+                checkbox.checked =
+                    Array.isArray(doctor.days) &&
+                    doctor.days.includes(
+                        checkbox.value
+                    );
 
-        editDoctorForm.dataset.editingDoctor =
-            doctor.name;
+            });
 
 
         doctorModal.classList.add(
-            "active"
+            "show"
         );
-
-
-        doctorModal.style.display =
-            "flex";
 
     }
 
 
-    // ==================================================
-    // CLOSE MODAL
-    // ==================================================
+    // ==========================================
+    // CLOSE EDIT DOCTOR MODAL
+    // ==========================================
 
-    function closeModal() {
+    function closeEditDoctorModal() {
+
+        if (!doctorModal) {
+            return;
+        }
+
 
         doctorModal.classList.remove(
-            "active"
+            "show"
         );
 
 
-        doctorModal.style.display =
-            "none";
+        editingDoctorId =
+            null;
 
 
-        editDoctorForm.reset();
+        if (editDoctorForm) {
 
+            editDoctorForm.reset();
 
-        delete editDoctorForm.dataset.editingDoctor;
+        }
 
     }
 
 
-    // ==================================================
-    // EDIT BUTTON
-    // ==================================================
+    // ==========================================
+    // SAVE EDITED DOCTOR
+    // ==========================================
 
-    if (doctorsGrid) {
+    async function saveEditedDoctor(
+        event
+    ) {
 
-        doctorsGrid.addEventListener(
+        event.preventDefault();
+
+
+        if (!editingDoctorId) {
+
+            alert(
+                "No doctor selected."
+            );
+
+            return;
+
+        }
+
+
+        const days =
+            Array.from(
+                document.querySelectorAll(
+                    ".doctor-day:checked"
+                )
+            ).map(
+                (checkbox) =>
+                    checkbox.value
+            );
+
+
+        if (days.length === 0) {
+
+            alert(
+                "Please select at least one working day."
+            );
+
+            return;
+
+        }
+
+
+        const updatedDoctor = {
+
+            name:
+                editDoctorName.value.trim(),
+
+            specialty:
+                editDoctorSpecialty.value.trim(),
+
+            days:
+                days,
+
+            startTime:
+                editStartTime.value,
+
+            endTime:
+                editEndTime.value
+
+        };
+
+
+        if (
+            !updatedDoctor.name ||
+            !updatedDoctor.specialty ||
+            !updatedDoctor.startTime ||
+            !updatedDoctor.endTime
+        ) {
+
+            alert(
+                "Please complete all doctor fields."
+            );
+
+            return;
+
+        }
+
+
+        try {
+
+            const response =
+                await fetch(
+                    `${API_URL}/api/doctors/${editingDoctorId}`,
+                    {
+                        method: "PUT",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify(
+                                updatedDoctor
+                            )
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.message ||
+                    `Server returned ${response.status}`
+                );
+
+            }
+
+
+            if (!data.success) {
+
+                throw new Error(
+                    data.message ||
+                    "Failed to update doctor."
+                );
+
+            }
+
+
+            closeEditDoctorModal();
+
+            await loadDoctors();
+
+
+        } catch (error) {
+
+            console.error(
+                "Failed to update doctor:",
+                error
+            );
+
+
+            alert(
+                "Failed to update doctor.\n\n" +
+                error.message
+            );
+
+        }
+
+    }
+
+
+    // ==========================================
+    // OPEN ADD DOCTOR MODAL
+    // ==========================================
+
+    function openAddDoctorModal() {
+
+        if (!addDoctorModal) {
+            return;
+        }
+
+
+        if (addDoctorForm) {
+
+            addDoctorForm.reset();
+
+        }
+
+
+        addDoctorModal.classList.add(
+            "show"
+        );
+
+    }
+
+
+    // ==========================================
+    // CLOSE ADD DOCTOR MODAL
+    // ==========================================
+
+    function closeAddDoctorModalFunction() {
+
+        if (!addDoctorModal) {
+            return;
+        }
+
+
+        addDoctorModal.classList.remove(
+            "show"
+        );
+
+
+        if (addDoctorForm) {
+
+            addDoctorForm.reset();
+
+        }
+
+    }
+
+
+    // ==========================================
+    // ADD DOCTOR
+    // ==========================================
+
+    async function submitAddDoctor(
+        event
+    ) {
+
+        event.preventDefault();
+
+
+        const days =
+            Array.from(
+                document.querySelectorAll(
+                    ".add-doctor-day:checked"
+                )
+            ).map(
+                (checkbox) =>
+                    checkbox.value
+            );
+
+
+        if (days.length === 0) {
+
+            alert(
+                "Please select at least one working day."
+            );
+
+            return;
+
+        }
+
+
+        const newDoctor = {
+
+            name:
+                addDoctorName.value.trim(),
+
+            specialty:
+                addDoctorSpecialty.value.trim(),
+
+            days:
+                days,
+
+            startTime:
+                addStartTime.value,
+
+            endTime:
+                addEndTime.value,
+
+            active:
+                true
+
+        };
+
+
+        if (
+            !newDoctor.name ||
+            !newDoctor.specialty ||
+            !newDoctor.startTime ||
+            !newDoctor.endTime
+        ) {
+
+            alert(
+                "Please complete all doctor fields."
+            );
+
+            return;
+
+        }
+
+
+        try {
+
+            const response =
+                await fetch(
+                    `${API_URL}/api/doctors`,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify(
+                                newDoctor
+                            )
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.message ||
+                    `Server returned ${response.status}`
+                );
+
+            }
+
+
+            if (!data.success) {
+
+                throw new Error(
+                    data.message ||
+                    "Failed to add doctor."
+                );
+
+            }
+
+
+            closeAddDoctorModalFunction();
+
+            await loadDoctors();
+
+
+        } catch (error) {
+
+            console.error(
+                "Failed to add doctor:",
+                error
+            );
+
+
+            alert(
+                "Failed to add doctor.\n\n" +
+                error.message
+            );
+
+        }
+
+    }
+
+
+    // ==========================================
+    // SEARCH
+    // ==========================================
+
+    if (searchInput) {
+
+        searchInput.addEventListener(
+            "input",
+            renderAppointments
+        );
+
+    }
+
+
+    // ==========================================
+    // DOCTOR FILTER
+    // ==========================================
+
+    if (doctorFilter) {
+
+        doctorFilter.addEventListener(
+            "change",
+            renderAppointments
+        );
+
+    }
+
+
+    // ==========================================
+    // DATE FILTER
+    // ==========================================
+
+    if (dateFilter) {
+
+        dateFilter.addEventListener(
+            "change",
+            renderAppointments
+        );
+
+    }
+
+
+    // ==========================================
+    // REFRESH
+    // ==========================================
+
+    if (refreshButton) {
+
+        refreshButton.addEventListener(
             "click",
-            function (event) {
+            async () => {
 
-                const button =
-                    event.target.closest(
-                        ".edit-doctor-btn"
-                    );
+                const originalText =
+                    refreshButton.textContent;
 
 
-                if (!button) {
+                refreshButton.disabled =
+                    true;
 
-                    return;
+
+                refreshButton.textContent =
+                    "Refreshing...";
+
+
+                try {
+
+                    await loadDoctors();
+
+                    await loadAppointments();
+
+                } finally {
+
+                    refreshButton.disabled =
+                        false;
+
+                    refreshButton.textContent =
+                        originalText ||
+                        "↻ Refresh";
 
                 }
-
-
-                const doctorName =
-                    button.dataset.doctor;
-
-
-                openDoctorModal(
-                    doctorName
-                );
 
             }
         );
@@ -993,15 +1786,43 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    // ==================================================
-    // CLOSE BUTTONS
-    // ==================================================
+    // ==========================================
+    // ADD DOCTOR BUTTON
+    // ==========================================
+
+    if (addDoctorButton) {
+
+        addDoctorButton.addEventListener(
+            "click",
+            openAddDoctorModal
+        );
+
+    }
+
+
+    // ==========================================
+    // EDIT DOCTOR FORM
+    // ==========================================
+
+    if (editDoctorForm) {
+
+        editDoctorForm.addEventListener(
+            "submit",
+            saveEditedDoctor
+        );
+
+    }
+
+
+    // ==========================================
+    // CLOSE EDIT MODAL
+    // ==========================================
 
     if (closeDoctorModal) {
 
         closeDoctorModal.addEventListener(
             "click",
-            closeModal
+            closeEditDoctorModal
         );
 
     }
@@ -1011,572 +1832,201 @@ document.addEventListener("DOMContentLoaded", function () {
 
         cancelDoctorEdit.addEventListener(
             "click",
-            closeModal
+            closeEditDoctorModal
         );
 
     }
 
 
-    // ==================================================
-    // CLICK OUTSIDE MODAL
-    // ==================================================
+    // ==========================================
+    // CLOSE ADD DOCTOR MODAL
+    // ==========================================
 
-    doctorModal.addEventListener(
-        "click",
-        function (event) {
+    if (closeAddDoctorModal) {
 
-            if (
-                event.target ===
-                doctorModal
-            ) {
+        closeAddDoctorModal.addEventListener(
+            "click",
+            closeAddDoctorModalFunction
+        );
 
-                closeModal();
+    }
+
+
+    if (cancelAddDoctor) {
+
+        cancelAddDoctor.addEventListener(
+            "click",
+            closeAddDoctorModalFunction
+        );
+
+    }
+
+
+    // ==========================================
+    // ADD DOCTOR FORM
+    // ==========================================
+
+    if (addDoctorForm) {
+
+        addDoctorForm.addEventListener(
+            "submit",
+            submitAddDoctor
+        );
+
+    }
+
+
+    // ==========================================
+    // CLOSE MODALS WHEN CLICKING OUTSIDE
+    // ==========================================
+
+    if (doctorModal) {
+
+        doctorModal.addEventListener(
+            "click",
+            (event) => {
+
+                if (
+                    event.target ===
+                    doctorModal
+                ) {
+
+                    closeEditDoctorModal();
+
+                }
 
             }
+        );
 
-        }
-    );
+    }
 
 
-    // ==================================================
-    // ESCAPE KEY
-    // ==================================================
+    if (addDoctorModal) {
+
+        addDoctorModal.addEventListener(
+            "click",
+            (event) => {
+
+                if (
+                    event.target ===
+                    addDoctorModal
+                ) {
+
+                    closeAddDoctorModalFunction();
+
+                }
+
+            }
+        );
+
+    }
+
+
+    // ==========================================
+    // ESC KEY
+    // ==========================================
 
     document.addEventListener(
         "keydown",
-        function (event) {
+        (event) => {
 
-            if (
-                event.key === "Escape" &&
-                doctorModal.classList.contains(
-                    "active"
-                )
-            ) {
-
-                closeModal();
-
+            if (event.key !== "Escape") {
+                return;
             }
+
+
+            closeEditDoctorModal();
+
+            closeAddDoctorModalFunction();
 
         }
     );
 
 
-    // ==================================================
-    // SAVE DOCTOR
-    // ==================================================
+    // ==========================================
+    // AUTO REFRESH
+    // ==========================================
 
-    editDoctorForm.addEventListener(
-        "submit",
-        function (event) {
+    setInterval(
+        () => {
 
-            event.preventDefault();
-
-
-            const originalName =
-                editDoctorForm.dataset.editingDoctor;
-
-
-            const doctor =
-                getDoctorByName(
-                    originalName
-                );
-
-
-            if (!doctor) {
-
-                return;
-
-            }
-
-
-            const newName =
-                editDoctorName.value.trim();
-
-
-            const newSpecialty =
-                editDoctorSpecialty.value.trim();
-
-
-            const newStartTime =
-                editStartTime.value;
-
-
-            const newEndTime =
-                editEndTime.value;
-
-
-            const newDays =
-                getSelectedDays();
-
-
-            if (!newName) {
-
-                alert(
-                    "Please enter the doctor's name."
-                );
-
-                return;
-
-            }
-
-
-            if (!newSpecialty) {
-
-                alert(
-                    "Please enter the doctor's specialty."
-                );
-
-                return;
-
-            }
-
-
-            if (newDays.length === 0) {
-
-                alert(
-                    "Please select at least one working day."
-                );
-
-                return;
-
-            }
-
-
-            if (
-                !newStartTime ||
-                !newEndTime
-            ) {
-
-                alert(
-                    "Please select the working hours."
-                );
-
-                return;
-
-            }
-
-
-            const oldName =
-                doctor.name;
-
-
-            doctor.name =
-                newName;
-
-
-            doctor.specialty =
-                newSpecialty;
-
-
-            doctor.days =
-                newDays;
-
-
-            doctor.startTime =
-                newStartTime;
-
-
-            doctor.endTime =
-                newEndTime;
-
-
-            saveDoctors();
-
-
-            // Update appointments
-            // using old doctor name
-
-            const appointments =
-                getAppointments();
-
-
-            appointments.forEach(
-                function (appointment) {
-
-                    if (
-                        appointment.doctor ===
-                        oldName
-                    ) {
-
-                        appointment.doctor =
-                            newName;
-
-                    }
-
-                }
+            console.log(
+                "Auto-refreshing appointments..."
             );
 
 
-            saveAppointments(
-                appointments
-            );
+            loadAppointments();
 
-
-            renderDoctors();
-
-            updateDoctorFilter();
-
-            updateDashboard();
-
-            closeModal();
-
-
-            alert(
-                "Doctor information updated successfully."
-            );
-
-        }
+        },
+        30000
     );
 
 
-    // ==================================================
-    // RENDER DOCTORS
-    // ==================================================
+    // ==========================================
+    // ESCAPE HTML
+    // ==========================================
 
-    function renderDoctors() {
+    function escapeHTML(value) {
 
-        if (!doctorsGrid) {
+        if (
+            value === null ||
+            value === undefined
+        ) {
 
-            return;
-
-        }
-
-
-        doctorsGrid.innerHTML = "";
-
-
-        doctors.forEach(
-            function (doctor) {
-
-                const initials =
-                    doctor.name
-                        .replace(
-                            "Dr. ",
-                            ""
-                        )
-                        .split(" ")
-                        .map(
-                            function (word) {
-
-                                return word
-                                    .charAt(0);
-
-                            }
-                        )
-                        .join("")
-                        .substring(
-                            0,
-                            2
-                        )
-                        .toUpperCase();
-
-
-                const card =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                card.className =
-                    "admin-doctor-card";
-
-
-                card.dataset.doctor =
-                    doctor.name;
-
-
-                card.innerHTML = `
-
-                    <div class="admin-doctor-avatar">
-                        ${initials}
-                    </div>
-
-                    <div class="admin-doctor-info">
-
-                        <h3>
-                            ${doctor.name}
-                        </h3>
-
-                        <p>
-                            ${doctor.specialty}
-                        </p>
-
-                    </div>
-
-                    <div class="admin-doctor-details">
-
-                        <div>
-
-                            <span>
-                                📅
-                            </span>
-
-                            <p>
-                                ${doctor.days.join(", ")}
-                            </p>
-
-                        </div>
-
-                        <div>
-
-                            <span>
-                                🕐
-                            </span>
-
-                            <p>
-                                ${doctor.startTime}
-                                -
-                                ${doctor.endTime}
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                    <div class="admin-doctor-footer">
-
-                        <span class="doctor-active">
-                            ● Active
-                        </span>
-
-                        <button
-                            type="button"
-                            class="edit-doctor-btn"
-                            data-doctor="${doctor.name}"
-                        >
-                            Edit
-                        </button>
-
-                    </div>
-
-                `;
-
-
-                doctorsGrid.appendChild(
-                    card
-                );
-
-            }
-        );
-
-
-        if (doctorCount) {
-
-            doctorCount.textContent =
-                doctors.length;
-
-        }
-
-    }
-
-
-    // ==================================================
-    // UPDATE DOCTOR FILTER
-    // ==================================================
-
-    function updateDoctorFilter() {
-
-        if (!doctorFilter) {
-
-            return;
+            return "";
 
         }
 
 
-        const currentValue =
-            doctorFilter.value;
-
-
-        doctorFilter.innerHTML = `
-
-            <option value="">
-                All Doctors
-            </option>
-
-        `;
-
-
-        doctors.forEach(
-            function (doctor) {
-
-                const option =
-                    document.createElement(
-                        "option"
-                    );
-
-
-                option.value =
-                    doctor.name;
-
-
-                option.textContent =
-                    doctor.name;
-
-
-                doctorFilter.appendChild(
-                    option
-                );
-
-            }
-        );
-
-
-        const stillExists =
-            doctors.some(
-                function (doctor) {
-
-                    return doctor.name ===
-                        currentValue;
-
-                }
+        return String(value)
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
             );
 
-
-        if (stillExists) {
-
-            doctorFilter.value =
-                currentValue;
-
-        }
-
     }
 
 
-    // ==================================================
-    // ADD DOCTOR
-    // ==================================================
+    // ==========================================
+    // INITIALIZE
+    // ==========================================
 
-    if (addDoctorButton) {
+    async function initializeDashboard() {
 
-        addDoctorButton.addEventListener(
-            "click",
-            function () {
+        console.log(
+            "Initializing CarePoint Admin Dashboard..."
+        );
 
-                alert(
-                    "Add Doctor will be added in the next stage."
-                );
 
-            }
+        await Promise.all([
+            loadDoctors(),
+            loadAppointments()
+        ]);
+
+
+        console.log(
+            "CarePoint Admin Dashboard initialized successfully."
         );
 
     }
 
 
-    // ==================================================
-    // SIDEBAR NAVIGATION
-    // ==================================================
-
-    const adminNavLinks =
-        document.querySelectorAll(
-            ".admin-nav-link"
-        );
-
-
-    adminNavLinks.forEach(
-        function (link) {
-
-            link.addEventListener(
-                "click",
-                function (event) {
-
-                    event.preventDefault();
-
-
-                    adminNavLinks.forEach(
-                        function (item) {
-
-                            item.classList.remove(
-                                "active"
-                            );
-
-                        }
-                    );
-
-
-                    link.classList.add(
-                        "active"
-                    );
-
-
-                    const targetId =
-                        link
-                            .getAttribute("href")
-                            .replace(
-                                "#",
-                                ""
-                            );
-
-
-                    const targetSection =
-                        document.getElementById(
-                            targetId
-                        );
-
-
-                    if (!targetSection) {
-
-                        return;
-
-                    }
-
-
-                    targetSection.scrollIntoView({
-                        behavior: "smooth",
-                        block: "start"
-                    });
-
-                }
-            );
-
-        }
-    );
-
-
-    // ==================================================
-    // MOBILE MENU
-    // ==================================================
-
-    const mobileMenuButton =
-        document.querySelector(
-            ".mobile-menu-button"
-        );
-
-
-    const sidebar =
-        document.querySelector(
-            ".admin-sidebar"
-        );
-
-
-    if (
-        mobileMenuButton &&
-        sidebar
-    ) {
-
-        mobileMenuButton.addEventListener(
-            "click",
-            function () {
-
-                sidebar.classList.toggle(
-                    "mobile-open"
-                );
-
-            }
-        );
-
-    }
-
-
-    // ==================================================
-    // START APPLICATION
-    // ==================================================
-
-    loadDoctors();
-
-    renderDoctors();
-
-    updateDoctorFilter();
-
-    updateDashboard();
+    initializeDashboard();
 
 });

@@ -1,241 +1,483 @@
-// ==========================================
-// CAREPOINT CLINIC
-// PATIENT BOOKING SYSTEM
-// ==========================================
+/* =========================================================
+   CAREPOINT CLINIC
+   PATIENT SCRIPT.JS
+   ========================================================= */
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    console.log("CarePoint Patient JS loaded.");
+
+    /* =====================================================
+       API
+    ===================================================== */
+
+    const API_URL = "https://carepoint-backend-zu71.onrender.com";
 
 
-// ==========================================
-// GET ELEMENTS
-// ==========================================
+    /* =====================================================
+       DOCTOR DATA
+    ===================================================== */
 
-const bookingForm =
-    document.getElementById("booking-form");
-
-const patientNameInput =
-    document.getElementById("patient-name");
-
-const doctorSelect =
-    document.getElementById("doctor");
-
-const appointmentDate =
-    document.getElementById("appointment-date");
-
-const appointmentTime =
-    document.getElementById("appointment-time");
-
-const reasonInput =
-    document.getElementById("reason");
-
-const appointmentsList =
-    document.getElementById("appointments-list");
-
-const noAppointments =
-    document.getElementById("no-appointments");
-
-const confirmationMessage =
-    document.getElementById(
-        "confirmation-message"
-    );
+    let doctors = [];
 
 
-// Error messages
+    /* =====================================================
+       ELEMENTS
+    ===================================================== */
 
-const nameError =
-    document.getElementById("name-error");
+    const doctorsGrid =
+        document.querySelector(".doctors-grid");
 
-const doctorError =
-    document.getElementById("doctor-error");
+    const doctorSelect =
+        document.getElementById("doctor");
 
-const dateError =
-    document.getElementById("date-error");
+    const appointmentDate =
+        document.getElementById("appointment-date");
 
-const timeError =
-    document.getElementById("time-error");
+    const appointmentTime =
+        document.getElementById("appointment-time");
 
+    const bookingForm =
+        document.getElementById("booking-form");
 
-// ==========================================
-// DOCTOR SCHEDULES
-// ==========================================
+    const appointmentsList =
+        document.getElementById("appointments-list");
 
-const doctorSchedules = {
-
-    "Dr. Sarah Johnson": {
-
-        days: [1, 3, 5],
-
-        startHour: 9,
-
-        endHour: 15
-
-    },
+    const confirmationMessage =
+        document.getElementById("confirmation-message");
 
 
-    "Dr. Michael Brown": {
+    /* =====================================================
+       LOAD DOCTORS FROM MONGODB
+    ===================================================== */
 
-        days: [2, 4],
+    async function loadDoctors() {
 
-        startHour: 10,
+        try {
 
-        endHour: 16
+            console.log("Loading doctors from MongoDB...");
 
-    },
+            const response = await fetch(
+                `${API_URL}/api/doctors`
+            );
+
+            if (!response.ok) {
+                throw new Error(
+                    `Server returned ${response.status}`
+                );
+            }
+
+            const data = await response.json();
+
+            if (
+                data.success &&
+                Array.isArray(data.doctors)
+            ) {
+
+                doctors = data.doctors;
+
+                console.log(
+                    "Doctors loaded:",
+                    doctors.length
+                );
+
+                renderDoctors();
+
+                updateDoctorSelect();
+
+                updateTimeOptions();
+
+                return;
+            }
+
+            throw new Error(
+                "Invalid doctors response from backend."
+            );
+
+        } catch (error) {
+
+            console.error(
+                "Failed to load doctors from MongoDB:",
+                error
+            );
+
+            if (doctorsGrid) {
+
+                doctorsGrid.innerHTML = `
+
+                    <div class="error-message">
+
+                        <h3>
+                            Unable to load doctors
+                        </h3>
+
+                        <p>
+                            Please make sure the CarePoint
+                            backend is running.
+                        </p>
+
+                    </div>
+
+                `;
+
+            }
+        }
+    }
 
 
-    "Dr. Emily Williams": {
+    /* =====================================================
+       RENDER DOCTORS
+    ===================================================== */
 
-        days: [1, 2, 4],
+    function renderDoctors() {
 
-        startHour: 8,
+        if (!doctorsGrid) {
+            return;
+        }
 
-        endHour: 14
+        doctorsGrid.innerHTML = "";
+
+        const activeDoctors =
+            doctors.filter(
+                doctor =>
+                    doctor.active !== false
+            );
+
+
+        if (activeDoctors.length === 0) {
+
+            doctorsGrid.innerHTML = `
+
+                <div class="no-doctors">
+
+                    <p>
+                        No doctors are currently available.
+                    </p>
+
+                </div>
+
+            `;
+
+            return;
+        }
+
+
+        activeDoctors.forEach(function (doctor) {
+
+            const card =
+                document.createElement("div");
+
+            card.className =
+                "doctor-card";
+
+
+            const icon =
+                doctor.name
+                    .toLowerCase()
+                    .includes("michael")
+                    ? "👨‍⚕️"
+                    : "👩‍⚕️";
+
+
+            const doctorId =
+                doctor._id ||
+                doctor.id ||
+                "";
+
+
+            card.innerHTML = `
+
+                <div class="doctor-icon">
+                    ${icon}
+                </div>
+
+
+                <div class="doctor-info">
+
+                    <h3>
+                        ${escapeHTML(
+                            doctor.name
+                        )}
+                    </h3>
+
+
+                    <p class="doctor-specialty">
+                        ${escapeHTML(
+                            doctor.specialty
+                        )}
+                    </p>
+
+
+                    <div class="doctor-details">
+
+                        <p>
+                            📅
+                            ${escapeHTML(
+                                Array.isArray(doctor.days)
+                                    ? doctor.days.join(", ")
+                                    : ""
+                            )}
+                        </p>
+
+
+                        <p>
+                            🕐
+                            ${escapeHTML(
+                                doctor.startTime
+                            )}
+                            -
+                            ${escapeHTML(
+                                doctor.endTime
+                            )}
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <a
+                    href="#booking"
+                    class="doctor-button"
+                    data-doctor="${escapeHTML(
+                        doctor.name
+                    )}"
+                    data-doctor-id="${escapeHTML(
+                        doctorId
+                    )}"
+                >
+                    Book with Doctor
+                </a>
+
+            `;
+
+
+            doctorsGrid.appendChild(card);
+
+        });
+
+
+        attachDoctorButtons();
 
     }
 
-};
+
+    /* =====================================================
+       UPDATE DOCTOR SELECT
+    ===================================================== */
+
+    function updateDoctorSelect() {
+
+        if (!doctorSelect) {
+            return;
+        }
 
 
-// ==========================================
-// GET APPOINTMENTS
-// ==========================================
-
-function getAppointments() {
-
-    const saved =
-        localStorage.getItem(
-            "appointments"
-        );
+        const currentValue =
+            doctorSelect.value;
 
 
-    if (!saved) {
+        doctorSelect.innerHTML = `
 
-        return [];
-
-    }
-
-
-    try {
-
-        return JSON.parse(saved);
-
-    } catch (error) {
-
-        console.error(
-            "Error reading appointments:",
-            error
-        );
-
-        return [];
-
-    }
-
-}
-
-
-// ==========================================
-// SAVE APPOINTMENTS
-// ==========================================
-
-function saveAppointments(
-    appointments
-) {
-
-    localStorage.setItem(
-        "appointments",
-        JSON.stringify(appointments)
-    );
-
-}
-
-
-// ==========================================
-// GENERATE TIME SLOTS
-// ==========================================
-
-function generateTimeSlots() {
-
-    const doctor =
-        doctorSelect.value;
-
-    const date =
-        appointmentDate.value;
-
-
-    appointmentTime.innerHTML = "";
-
-
-    if (!doctor) {
-
-        appointmentTime.innerHTML = `
             <option value="">
-                Select a doctor first
+                Select a doctor
             </option>
+
         `;
 
-        return;
 
-    }
+        doctors
+            .filter(
+                doctor =>
+                    doctor.active !== false
+            )
+            .forEach(function (doctor) {
 
-
-    if (!date) {
-
-        appointmentTime.innerHTML = `
-            <option value="">
-                Select a date first
-            </option>
-        `;
-
-        return;
-
-    }
+                const option =
+                    document.createElement("option");
 
 
-    const selectedDate =
-        new Date(
-            date + "T00:00:00"
-        );
+                option.value =
+                    doctor.name;
 
 
-    const day =
-        selectedDate.getDay();
+                option.textContent =
+                    doctor.name;
 
 
-    const schedule =
-        doctorSchedules[doctor];
+                doctorSelect.appendChild(
+                    option
+                );
+
+            });
 
 
-    if (
-        !schedule.days.includes(day)
-    ) {
-
-        appointmentTime.innerHTML = `
-            <option value="">
-                Doctor unavailable on this day
-            </option>
-        `;
-
-        return;
-
-    }
-
-
-    const appointments =
-        getAppointments();
-
-
-    let slotCreated = false;
-
-
-    for (
-        let hour = schedule.startHour;
-        hour < schedule.endHour;
-        hour++
-    ) {
-
-        for (
-            let minute = 0;
-            minute < 60;
-            minute += 30
+        if (
+            doctors.some(
+                doctor =>
+                    doctor.name === currentValue &&
+                    doctor.active !== false
+            )
         ) {
+
+            doctorSelect.value =
+                currentValue;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       DOCTOR BUTTONS
+    ===================================================== */
+
+    function attachDoctorButtons() {
+
+        const buttons =
+            document.querySelectorAll(
+                ".doctor-button"
+            );
+
+
+        buttons.forEach(function (button) {
+
+            button.addEventListener(
+                "click",
+                function () {
+
+                    const doctorName =
+                        button.dataset.doctor;
+
+
+                    if (doctorSelect) {
+
+                        doctorSelect.value =
+                            doctorName;
+
+                        updateTimeOptions();
+
+                    }
+
+                }
+            );
+
+        });
+
+    }
+
+
+    /* =====================================================
+       GET SELECTED DOCTOR
+    ===================================================== */
+
+    function getSelectedDoctor() {
+
+        const name =
+            doctorSelect
+                ? doctorSelect.value
+                : "";
+
+
+        return doctors.find(
+            doctor =>
+                doctor.name === name
+        );
+
+    }
+
+
+    /* =====================================================
+       DATE HELPERS
+    ===================================================== */
+
+    function getDayName(dateString) {
+
+        if (!dateString) {
+            return "";
+        }
+
+
+        const date =
+            new Date(
+                dateString + "T00:00:00"
+            );
+
+
+        return date.toLocaleDateString(
+            "en-US",
+            {
+                weekday: "long"
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       GENERATE TIME SLOTS
+    ===================================================== */
+
+    function generateTimeSlots(
+        startTime,
+        endTime
+    ) {
+
+        const slots = [];
+
+
+        if (
+            !startTime ||
+            !endTime
+        ) {
+
+            return slots;
+
+        }
+
+
+        const [
+            startHour,
+            startMinute
+        ] =
+            startTime
+                .split(":")
+                .map(Number);
+
+
+        const [
+            endHour,
+            endMinute
+        ] =
+            endTime
+                .split(":")
+                .map(Number);
+
+
+        let currentMinutes =
+            startHour * 60 +
+            startMinute;
+
+
+        const endMinutes =
+            endHour * 60 +
+            endMinute;
+
+
+        while (
+            currentMinutes <
+            endMinutes
+        ) {
+
+            const hour =
+                Math.floor(
+                    currentMinutes / 60
+                );
+
+
+            const minute =
+                currentMinutes % 60;
+
 
             const formattedHour =
                 String(hour)
@@ -247,620 +489,916 @@ function generateTimeSlots() {
                     .padStart(2, "0");
 
 
-            const time =
-                `${formattedHour}:${formattedMinute}`;
+            slots.push(
+                `${formattedHour}:${formattedMinute}`
+            );
 
 
-            const alreadyBooked =
-                appointments.some(
-                    function (appointment) {
-
-                        return (
-                            appointment.doctor === doctor
-                            &&
-                            appointment.date === date
-                            &&
-                            appointment.time === time
-                            &&
-                            appointment.status !== "Cancelled"
-                        );
-
-                    }
-                );
-
-
-            if (!alreadyBooked) {
-
-                const option =
-                    document.createElement(
-                        "option"
-                    );
-
-                option.value =
-                    time;
-
-                option.textContent =
-                    time;
-
-                appointmentTime.appendChild(
-                    option
-                );
-
-                slotCreated = true;
-
-            }
+            currentMinutes += 30;
 
         }
 
-    }
 
-
-    if (!slotCreated) {
-
-        appointmentTime.innerHTML = `
-            <option value="">
-                No available times
-            </option>
-        `;
+        return slots;
 
     }
 
-}
 
+    /* =====================================================
+       UPDATE TIME OPTIONS
+    ===================================================== */
 
-// ==========================================
-// DOCTOR CHANGE
-// ==========================================
+    function updateTimeOptions() {
 
-doctorSelect.addEventListener(
-    "change",
-    function () {
-
-        generateTimeSlots();
-
-    }
-);
-
-
-// ==========================================
-// DATE CHANGE
-// ==========================================
-
-appointmentDate.addEventListener(
-    "change",
-    function () {
-
-        generateTimeSlots();
-
-    }
-);
-
-
-// ==========================================
-// SET MINIMUM DATE
-// ==========================================
-
-function setMinimumDate() {
-
-    const today =
-        new Date();
-
-
-    const year =
-        today.getFullYear();
-
-
-    const month =
-        String(
-            today.getMonth() + 1
-        ).padStart(2, "0");
-
-
-    const day =
-        String(
-            today.getDate()
-        ).padStart(2, "0");
-
-
-    const formattedDate =
-        `${year}-${month}-${day}`;
-
-
-    appointmentDate.min =
-        formattedDate;
-
-}
-
-
-setMinimumDate();
-
-
-// ==========================================
-// BOOK APPOINTMENT
-// ==========================================
-
-bookingForm.addEventListener(
-    "submit",
-    function (event) {
-
-        event.preventDefault();
-
-
-        // Clear errors
-
-        nameError.textContent = "";
-
-        doctorError.textContent = "";
-
-        dateError.textContent = "";
-
-        timeError.textContent = "";
-
-
-        let valid = true;
-
-
-        // NAME
-
-        const patientName =
-            patientNameInput.value.trim();
-
-
-        if (patientName.length < 2) {
-
-            nameError.textContent =
-                "Please enter your full name.";
-
-            valid = false;
-
+        if (!appointmentTime) {
+            return;
         }
 
 
-        // DOCTOR
+        appointmentTime.innerHTML = "";
+
 
         const doctor =
-            doctorSelect.value;
+            getSelectedDoctor();
 
 
         if (!doctor) {
 
-            doctorError.textContent =
-                "Please select a doctor.";
-
-            valid = false;
-
-        }
-
-
-        // DATE
-
-        const date =
-            appointmentDate.value;
-
-
-        if (!date) {
-
-            dateError.textContent =
-                "Please select an appointment date.";
-
-            valid = false;
-
-        }
-
-
-        // TIME
-
-        const time =
-            appointmentTime.value;
-
-
-        if (!time) {
-
-            timeError.textContent =
-                "Please select an appointment time.";
-
-            valid = false;
-
-        }
-
-
-        if (!valid) {
-
-            return;
-
-        }
-
-
-        // REASON
-
-        const reason =
-            reasonInput.value.trim();
-
-
-        if (!reason) {
-
-            alert(
-                "Please enter the reason for your visit."
-            );
-
-            return;
-
-        }
-
-
-        // GET EXISTING APPOINTMENTS
-
-        const appointments =
-            getAppointments();
-
-
-        // CREATE APPOINTMENT
-
-        const appointment = {
-
-            id: Date.now(),
-
-            patientName: patientName,
-
-            doctor: doctor,
-
-            date: date,
-
-            time: time,
-
-            reason: reason,
-
-            status: "Pending"
-
-        };
-
-
-        // SAVE
-
-        appointments.push(
-            appointment
-        );
-
-
-        saveAppointments(
-            appointments
-        );
-
-
-        // CONFIRMATION
-
-        confirmationMessage.innerHTML = `
-
-            <div class="success-message">
-
-                <h3>
-                    Appointment Booked Successfully!
-                </h3>
-
-                <p>
-                    Your appointment with
-                    <strong>${doctor}</strong>
-                    has been submitted.
-                </p>
-
-                <p>
-                    Date: <strong>${date}</strong>
-                </p>
-
-                <p>
-                    Time: <strong>${time}</strong>
-                </p>
-
-                <p>
-                    Status:
-                    <strong>Pending</strong>
-                </p>
-
-            </div>
-
-        `;
-
-
-        // RESET FORM
-
-        bookingForm.reset();
-
-
-        appointmentTime.innerHTML = `
-            <option value="">
-                Select a doctor first
-            </option>
-        `;
-
-
-        // UPDATE LIST
-
-        displayAppointments();
-
-
-        // SCROLL
-
-        document
-            .getElementById("appointments")
-            .scrollIntoView({
-                behavior: "smooth"
-            });
-
-    }
-);
-
-
-// ==========================================
-// DISPLAY APPOINTMENTS
-// ==========================================
-
-function displayAppointments() {
-
-    const appointments =
-        getAppointments();
-
-
-    appointmentsList.innerHTML = "";
-
-
-    if (appointments.length === 0) {
-
-        noAppointments.style.display =
-            "block";
-
-        return;
-
-    }
-
-
-    noAppointments.style.display =
-        "none";
-
-
-    appointments.forEach(
-        function (appointment) {
-
-            const card =
-                document.createElement(
-                    "div"
-                );
-
-
-            card.className =
-                "appointment-card";
-
-
-            // STATUS
-
-            let statusClass =
-                "appointment-pending";
-
-            let statusIcon =
-                "🟡";
-
-
-            if (
-                appointment.status ===
-                "Confirmed"
-            ) {
-
-                statusClass =
-                    "appointment-confirmed";
-
-                statusIcon =
-                    "🟢";
-
-            }
-
-
-            if (
-                appointment.status ===
-                "Cancelled"
-            ) {
-
-                statusClass =
-                    "appointment-cancelled";
-
-                statusIcon =
-                    "🔴";
-
-            }
-
-
-            card.innerHTML = `
-
-                <div class="appointment-header">
-
-                    <h3>
-                        ${appointment.doctor}
-                    </h3>
-
-                    <span
-                        class="${statusClass}"
-                    >
-                        ${statusIcon}
-                        ${appointment.status}
-                    </span>
-
-                </div>
-
-
-                <div class="appointment-details">
-
-                    <p>
-                        📅
-                        <strong>Date:</strong>
-                        ${appointment.date}
-                    </p>
-
-                    <p>
-                        🕐
-                        <strong>Time:</strong>
-                        ${appointment.time}
-                    </p>
-
-                    <p>
-                        📝
-                        <strong>Reason:</strong>
-                        ${appointment.reason}
-                    </p>
-
-                </div>
-
-
-                ${
-                    appointment.status !==
-                    "Cancelled"
-
-                    ?
-
-                    `
-                    <button
-                        class="cancel-appointment"
-                        data-id="${appointment.id}"
-                    >
-                        Cancel Appointment
-                    </button>
-                    `
-
-                    :
-
-                    ""
-                }
+            appointmentTime.innerHTML = `
+
+                <option value="">
+                    Select a doctor first
+                </option>
 
             `;
 
-
-            appointmentsList.appendChild(
-                card
-            );
+            return;
 
         }
-    );
 
-}
-
-
-// ==========================================
-// CANCEL APPOINTMENT
-// ==========================================
-
-appointmentsList.addEventListener(
-    "click",
-    function (event) {
 
         if (
-            !event.target.classList.contains(
-                "cancel-appointment"
-            )
+            !appointmentDate ||
+            !appointmentDate.value
         ) {
 
-            return;
+            appointmentTime.innerHTML = `
 
-        }
+                <option value="">
+                    Select a date first
+                </option>
 
-
-        const appointmentId =
-            Number(
-                event.target.dataset.id
-            );
-
-
-        const confirmed =
-            confirm(
-                "Are you sure you want to cancel this appointment?"
-            );
-
-
-        if (!confirmed) {
+            `;
 
             return;
 
         }
 
 
-        const appointments =
-            getAppointments();
-
-
-        const appointment =
-            appointments.find(
-                function (item) {
-
-                    return item.id ===
-                        appointmentId;
-
-                }
+        const selectedDay =
+            getDayName(
+                appointmentDate.value
             );
 
 
-        if (!appointment) {
+        if (
+            !Array.isArray(doctor.days) ||
+            !doctor.days.includes(selectedDay)
+        ) {
+
+            appointmentTime.innerHTML = `
+
+                <option value="">
+                    Doctor is not available on
+                    ${escapeHTML(selectedDay)}
+                </option>
+
+            `;
 
             return;
 
         }
 
 
-        appointment.status =
-            "Cancelled";
+        const slots =
+            generateTimeSlots(
+                doctor.startTime,
+                doctor.endTime
+            );
 
 
-        saveAppointments(
-            appointments
-        );
+        if (slots.length === 0) {
+
+            appointmentTime.innerHTML = `
+
+                <option value="">
+                    No available times
+                </option>
+
+            `;
+
+            return;
+
+        }
 
 
-        displayAppointments();
+        appointmentTime.innerHTML = `
 
-        generateTimeSlots();
+            <option value="">
+                Select appointment time
+            </option>
+
+        `;
+
+
+        slots.forEach(function (time) {
+
+            const option =
+                document.createElement("option");
+
+
+            option.value =
+                time;
+
+
+            option.textContent =
+                formatTime(time);
+
+
+            appointmentTime.appendChild(
+                option
+            );
+
+        });
 
     }
-);
 
 
-// ==========================================
-// INITIAL DISPLAY
-// ==========================================
+    /* =====================================================
+       FORMAT TIME
+    ===================================================== */
 
-displayAppointments();// ==========================================
-// BOOK WITH DOCTOR BUTTONS
-// ==========================================
+    function formatTime(time) {
 
-const doctorButtons =
-    document.querySelectorAll(".doctor-button");
+        if (!time) {
+            return "";
+        }
 
 
-doctorButtons.forEach(
-    function (button) {
+        const [
+            hourString,
+            minute
+        ] =
+            time.split(":");
 
-        button.addEventListener(
-            "click",
+
+        let hour =
+            Number(hourString);
+
+
+        const period =
+            hour >= 12
+                ? "PM"
+                : "AM";
+
+
+        hour =
+            hour % 12 || 12;
+
+
+        return (
+            hour +
+            ":" +
+            minute +
+            " " +
+            period
+        );
+
+    }
+
+
+    /* =====================================================
+       DATE MINIMUM
+    ===================================================== */
+
+    if (appointmentDate) {
+
+        const today =
+            new Date();
+
+
+        const year =
+            today.getFullYear();
+
+
+        const month =
+            String(
+                today.getMonth() + 1
+            ).padStart(2, "0");
+
+
+        const day =
+            String(
+                today.getDate()
+            ).padStart(2, "0");
+
+
+        appointmentDate.min =
+            `${year}-${month}-${day}`;
+
+    }
+
+
+    /* =====================================================
+       DOCTOR CHANGE
+    ===================================================== */
+
+    if (doctorSelect) {
+
+        doctorSelect.addEventListener(
+            "change",
             function () {
 
-                const selectedDoctor =
-                    button.getAttribute(
-                        "data-doctor"
-                    );
-
-
-                // Select the doctor
-                doctorSelect.value =
-                    selectedDoctor;
-
-
-                // Generate available times
-                generateTimeSlots();
-
-
-                // Scroll to booking form
-                document
-                    .getElementById("booking")
-                    .scrollIntoView({
-                        behavior: "smooth"
-                    });
+                updateTimeOptions();
 
             }
         );
 
     }
-);
+
+
+    /* =====================================================
+       DATE CHANGE
+    ===================================================== */
+
+    if (appointmentDate) {
+
+        appointmentDate.addEventListener(
+            "change",
+            function () {
+
+                updateTimeOptions();
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       BOOK APPOINTMENT
+       SAVE DIRECTLY TO MONGODB
+    ===================================================== */
+
+    if (bookingForm) {
+
+        bookingForm.addEventListener(
+            "submit",
+            async function (event) {
+
+                event.preventDefault();
+
+
+                const patientName =
+                    document.getElementById(
+                        "patient-name"
+                    )
+                        ? document.getElementById(
+                            "patient-name"
+                        ).value.trim()
+                        : "";
+
+
+                const doctor =
+                    doctorSelect
+                        ? doctorSelect.value
+                        : "";
+
+
+                const date =
+                    appointmentDate
+                        ? appointmentDate.value
+                        : "";
+
+
+                const time =
+                    appointmentTime
+                        ? appointmentTime.value
+                        : "";
+
+
+                const reasonElement =
+                    document.getElementById(
+                        "reason"
+                    );
+
+
+                const reason =
+                    reasonElement
+                        ? reasonElement.value.trim()
+                        : "";
+
+
+                /* =========================================
+                   VALIDATION
+                ========================================= */
+
+                if (!patientName) {
+
+                    alert(
+                        "Please enter your full name."
+                    );
+
+                    return;
+
+                }
+
+
+                if (!doctor) {
+
+                    alert(
+                        "Please select a doctor."
+                    );
+
+                    return;
+
+                }
+
+
+                if (!date) {
+
+                    alert(
+                        "Please select an appointment date."
+                    );
+
+                    return;
+
+                }
+
+
+                if (!time) {
+
+                    alert(
+                        "Please select an appointment time."
+                    );
+
+                    return;
+
+                }
+
+
+                if (!reason) {
+
+                    alert(
+                        "Please enter the reason for your visit."
+                    );
+
+                    return;
+
+                }
+
+
+                const selectedDoctor =
+                    doctors.find(
+                        item =>
+                            item.name === doctor
+                    );
+
+
+                if (!selectedDoctor) {
+
+                    alert(
+                        "The selected doctor could not be found."
+                    );
+
+                    return;
+
+                }
+
+
+                const selectedDay =
+                    getDayName(date);
+
+
+                if (
+                    !Array.isArray(
+                        selectedDoctor.days
+                    ) ||
+                    !selectedDoctor.days.includes(
+                        selectedDay
+                    )
+                ) {
+
+                    alert(
+                        `${doctor} is not available on ${selectedDay}.`
+                    );
+
+                    return;
+
+                }
+
+
+                /* =========================================
+                   DISABLE BUTTON WHILE BOOKING
+                ========================================= */
+
+                const submitButton =
+                    bookingForm.querySelector(
+                        'button[type="submit"]'
+                    );
+
+
+                const originalButtonText =
+                    submitButton
+                        ? submitButton.textContent
+                        : "";
+
+
+                if (submitButton) {
+
+                    submitButton.disabled =
+                        true;
+
+                    submitButton.textContent =
+                        "Booking...";
+
+                }
+
+
+                try {
+
+                    console.log(
+                        "Sending appointment to MongoDB..."
+                    );
+
+
+                    const response =
+                        await fetch(
+                            `${API_URL}/api/appointments`,
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body:
+                                    JSON.stringify({
+
+                                        patientName:
+                                            patientName,
+
+                                        doctor:
+                                            doctor,
+
+                                        date:
+                                            date,
+
+                                        time:
+                                            time,
+
+                                        reason:
+                                            reason
+
+                                    })
+
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            data.message ||
+                            `Server returned ${response.status}`
+                        );
+
+                    }
+
+
+                    if (
+                        !data.success ||
+                        !data.appointment
+                    ) {
+
+                        throw new Error(
+                            "Invalid appointment response."
+                        );
+
+                    }
+
+
+                    console.log(
+                        "Appointment saved to MongoDB:",
+                        data.appointment
+                    );
+
+
+                    /* =====================================
+                       SUCCESS MESSAGE
+                    ===================================== */
+
+                    if (confirmationMessage) {
+
+                        confirmationMessage.innerHTML = `
+
+                            <div class="success-message">
+
+                                <h3>
+                                    Appointment Booked Successfully! ✅
+                                </h3>
+
+                                <p>
+                                    Your appointment with
+                                    <strong>
+                                        ${escapeHTML(
+                                            doctor
+                                        )}
+                                    </strong>
+                                    has been submitted.
+                                </p>
+
+                                <p>
+                                    Date:
+                                    <strong>
+                                        ${escapeHTML(
+                                            date
+                                        )}
+                                    </strong>
+                                </p>
+
+                                <p>
+                                    Time:
+                                    <strong>
+                                        ${escapeHTML(
+                                            formatTime(time)
+                                        )}
+                                    </strong>
+                                </p>
+
+                                <p>
+                                    Status:
+                                    <strong>
+                                        Pending
+                                    </strong>
+                                </p>
+
+                            </div>
+
+                        `;
+
+                    }
+
+
+                    /* =====================================
+                       RESET FORM
+                    ===================================== */
+
+                    bookingForm.reset();
+
+
+                    if (appointmentTime) {
+
+                        appointmentTime.innerHTML = `
+
+                            <option value="">
+                                Select a doctor first
+                            </option>
+
+                        `;
+
+                    }
+
+
+                    /* =====================================
+                       RELOAD APPOINTMENTS FROM MONGODB
+                    ===================================== */
+
+                    await loadAppointmentsFromMongoDB();
+
+
+                    /* =====================================
+                       SCROLL TO APPOINTMENTS
+                    ===================================== */
+
+                    const appointmentsSection =
+                        document.getElementById(
+                            "appointments"
+                        );
+
+
+                    if (
+                        appointmentsSection
+                    ) {
+
+                        appointmentsSection.scrollIntoView({
+                            behavior: "smooth"
+                        });
+
+                    }
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Failed to book appointment:",
+                        error
+                    );
+
+
+                    alert(
+                        "Failed to book appointment. " +
+                        "Please make sure the CarePoint backend is running."
+                    );
+
+                } finally {
+
+                    if (submitButton) {
+
+                        submitButton.disabled =
+                            false;
+
+                        submitButton.textContent =
+                            originalButtonText ||
+                            "Book Appointment";
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       LOAD APPOINTMENTS FROM MONGODB
+    ===================================================== */
+
+    async function loadAppointmentsFromMongoDB() {
+
+        if (!appointmentsList) {
+            return;
+        }
+
+
+        try {
+
+            console.log(
+                "Loading appointments from MongoDB..."
+            );
+
+
+            const response =
+                await fetch(
+                    `${API_URL}/api/appointments`
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    `Server returned ${response.status}`
+                );
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                !data.success ||
+                !Array.isArray(
+                    data.appointments
+                )
+            ) {
+
+                throw new Error(
+                    "Invalid appointments response."
+                );
+
+            }
+
+
+            console.log(
+                "Appointments loaded:",
+                data.appointments
+            );
+
+
+            renderAppointments(
+                data.appointments
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Failed to load appointments:",
+                error
+            );
+
+
+            appointmentsList.innerHTML = `
+
+                <p id="no-appointments">
+
+                    Unable to load appointments.
+                    Please make sure the backend is running.
+
+                </p>
+
+            `;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       RENDER APPOINTMENTS
+    ===================================================== */
+
+    function renderAppointments(
+        appointments
+    ) {
+
+        if (!appointmentsList) {
+            return;
+        }
+
+
+        appointmentsList.innerHTML = "";
+
+
+        if (
+            !appointments ||
+            appointments.length === 0
+        ) {
+
+            appointmentsList.innerHTML = `
+
+                <p id="no-appointments">
+                    No appointments booked yet.
+                </p>
+
+            `;
+
+            return;
+
+        }
+
+
+        appointments
+            .slice()
+            .reverse()
+            .forEach(function (appointment) {
+
+                const card =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                card.className =
+                    "appointment-card";
+
+
+                const status =
+                    appointment.status ||
+                    "Pending";
+
+
+                card.innerHTML = `
+
+                    <div>
+
+                        <h3>
+                            ${escapeHTML(
+                                appointment.doctor
+                            )}
+                        </h3>
+
+
+                        <p>
+                            👤
+                            ${escapeHTML(
+                                appointment.patientName ||
+                                ""
+                            )}
+                        </p>
+
+
+                        <p>
+                            📅
+                            ${escapeHTML(
+                                appointment.date ||
+                                ""
+                            )}
+                        </p>
+
+
+                        <p>
+                            🕐
+                            ${escapeHTML(
+                                formatTime(
+                                    appointment.time
+                                )
+                            )}
+                        </p>
+
+
+                        <p>
+                            📝
+                            ${escapeHTML(
+                                appointment.reason ||
+                                ""
+                            )}
+                        </p>
+
+                    </div>
+
+
+                    <span class="status-badge">
+
+                        ${escapeHTML(
+                            status
+                        )}
+
+                    </span>
+
+                `;
+
+
+                appointmentsList.appendChild(
+                    card
+                );
+
+            });
+
+    }
+
+
+    /* =====================================================
+       ESCAPE HTML
+    ===================================================== */
+
+    function escapeHTML(value) {
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+
+            return "";
+
+        }
+
+
+        return String(value)
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
+    }
+
+
+    /* =====================================================
+       INITIALIZE
+    ===================================================== */
+
+    loadDoctors();
+
+    loadAppointmentsFromMongoDB();
+
+
+    console.log(
+        "CarePoint Patient Dashboard initialized successfully."
+    );
+
+});

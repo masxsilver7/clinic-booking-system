@@ -850,7 +850,223 @@
         </div>
 
     </div>
+<!-- ==========================================
+     ADD DOCTOR MODAL
+=========================================== -->
 
+<div
+    id="add-doctor-modal"
+    class="doctor-modal"
+>
+
+    <div class="doctor-modal-content">
+
+        <!-- MODAL HEADER -->
+
+        <div class="doctor-modal-header">
+
+            <div>
+
+                <p class="admin-label">
+                    MEDICAL TEAM
+                </p>
+
+                <h2>
+                    Add Doctor
+                </h2>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="close-add-doctor-modal"
+                class="doctor-modal-close"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <!-- FORM -->
+
+        <form id="add-doctor-form">
+
+            <!-- NAME -->
+
+            <div class="form-group">
+
+                <label for="add-doctor-name">
+                    Doctor Name
+                </label>
+
+                <input
+                    type="text"
+                    id="add-doctor-name"
+                    placeholder="e.g. Dr. John Smith"
+                    required
+                >
+
+            </div>
+
+
+            <!-- SPECIALTY -->
+
+            <div class="form-group">
+
+                <label for="add-doctor-specialty">
+                    Specialty
+                </label>
+
+                <input
+                    type="text"
+                    id="add-doctor-specialty"
+                    placeholder="e.g. Dermatologist"
+                    required
+                >
+
+            </div>
+
+
+            <!-- WORKING DAYS -->
+
+            <div class="form-group">
+
+                <label>
+                    Working Days
+                </label>
+
+
+                <div class="doctor-days">
+
+                    <label>
+                        <input
+                            type="checkbox"
+                            class="add-doctor-day"
+                            value="Monday"
+                        >
+                        Monday
+                    </label>
+
+
+                    <label>
+                        <input
+                            type="checkbox"
+                            class="add-doctor-day"
+                            value="Tuesday"
+                        >
+                        Tuesday
+                    </label>
+
+
+                    <label>
+                        <input
+                            type="checkbox"
+                            class="add-doctor-day"
+                            value="Wednesday"
+                        >
+                        Wednesday
+                    </label>
+
+
+                    <label>
+                        <input
+                            type="checkbox"
+                            class="add-doctor-day"
+                            value="Thursday"
+                        >
+                        Thursday
+                    </label>
+
+
+                    <label>
+                        <input
+                            type="checkbox"
+                            class="add-doctor-day"
+                            value="Friday"
+                        >
+                        Friday
+                    </label>
+
+
+                    <label>
+                        <input
+                            type="checkbox"
+                            class="add-doctor-day"
+                            value="Saturday"
+                        >
+                        Saturday
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <!-- WORKING HOURS -->
+
+            <div class="doctor-time-grid">
+
+                <div class="form-group">
+
+                    <label for="add-start-time">
+                        Start Time
+                    </label>
+
+                    <input
+                        type="time"
+                        id="add-start-time"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="add-end-time">
+                        End Time
+                    </label>
+
+                    <input
+                        type="time"
+                        id="add-end-time"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- ACTIONS -->
+
+            <div class="doctor-modal-actions">
+
+                <button
+                    type="button"
+                    id="cancel-add-doctor"
+                    class="admin-cancel-btn"
+                >
+                    Cancel
+                </button>
+
+
+                <button
+                    type="submit"
+                    class="admin-save-btn"
+                >
+                    Add Doctor
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
 
     <script src="admin.js"></script>
 
